@@ -36,6 +36,7 @@ class Command:
 
 
 class ListCommand(Command):
+    # output じゃなくてmessage見ればいいのでは
     def output(self) -> Optional[int]:
         if len(self.message) == 0:
             return "エントリは空です"
@@ -98,8 +99,8 @@ class Add(Command):
             return None
 
     def __parse(self, elements: List[str]):
-        if len(elements) == 1:
-            self.message = "add help"
+        if len(elements) == 0:
+            self.message = "ex) add medi_4 locker_0 zone_1 \n 入力可能文字は, ammo, medi, tool, fog, c-form, melter, mineです"
             return
 
         storingItem = {
@@ -108,9 +109,9 @@ class Add(Command):
 
         global store, store_index
         store[store_index] = storingItem
-        store_index += 1
 
-        self.message = storingItem.__str__()
+        self.message = f"index: {store_index}, value{storingItem.__str__()}"
+        store_index += 1
 
     def __init__(self, elements: List[str]):
         self.message = "???"
