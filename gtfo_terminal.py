@@ -31,7 +31,7 @@ def parse(message_content: str) -> Command:
     command: str = elements[0].lower()
 
     if "help".startswith(command):
-        return Commands()
+        return Help()
     else:
         return UnknownCommand()
 
