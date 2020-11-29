@@ -1,4 +1,4 @@
-.PHONY: run pipenv
+.PHONY: run pipenv mypy
 
 default: pipenv token
 
@@ -11,3 +11,5 @@ token:
 run:
 	pipenv run ./gtfo_terminal.py
 
+mypy:
+	pipenv run mypy ./gtfo_terminal.py
