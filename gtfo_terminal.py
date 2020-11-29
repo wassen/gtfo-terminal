@@ -51,6 +51,31 @@ class ListCommand(Command):
         self.__parse(elements[1:])
 
 
+class Delete(Command):
+    def output(self) -> Optional[int]:
+        return self.message
+
+    def __parse(self, elements: List[str]):
+        if len(elements) == 0:
+            self.message = "indexを指定してください ex) delete 0"
+            return
+
+        index = elements[0]
+
+        global store
+
+        deletedItem = store.pop(int(index), None)
+
+        if deletedItem is None:
+            self.message = f"indexが{index}なアイテムはないです"
+        else:
+            self.message = f"以下のアイテムを削除しました{deletedItem}"
+
+    def __init__(self, elements: List[str]):
+        self.message = "???"
+        self.__parse(elements[1:])
+
+
 class Add(Command):
     def output(self) -> Optional[str]:
         return self.message
@@ -113,6 +138,8 @@ def parse_command(message_content: str) -> Command:
         return Add(elements)
     elif "list".startswith(command):
         return ListCommand(elements)
+    elif "delete".startswith(command):
+        return Delete(elements)
     else:
         return UnknownCommand()
 
