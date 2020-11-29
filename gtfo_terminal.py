@@ -4,6 +4,7 @@
 from typing import Dict, List, Optional
 
 import discord
+import sys
 
 
 class Item:
@@ -145,12 +146,25 @@ def parse_command(message_content: str) -> Command:
         return UnknownCommand()
 
 
+class Setting:
+    def __init__(self):
+        import yaml
+
+        with open("setting.yaml") as setting_file:
+            setting = yaml.safe_load(setting_file)
+            self.develop_guild_name = setting["environment"]["develop"]
+            self.release_guild_name = setting["environment"]["release"]
+
+
 class GTFOTerminal(discord.Client):
     async def on_ready(self):
         print(f"We have logged in as {self.user}".format())
 
     async def on_message(self: discord.Client, message: discord.Message):
         if message.author == self.user:
+            return
+
+        if not (sys.argv[1] == "develop" and message.guild.name == Setting().develop_guild_name or sys.argv[1] == "release" and not message.guild.name == Setting().release_guild_name):
             return
 
         if not message.channel.name == "gtfo_playing":
