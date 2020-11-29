@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 import discord
 
@@ -35,9 +35,26 @@ class Command:
         pass
 
 
+class ListCommand(Command):
+    def output(self) -> Optional[int]:
+        if len(self.message) == 0:
+            return "エントリは空です"
+
+        return self.message
+
+    def __parse(self, elements: List[str]):
+        formatted_output_line = [f"index: {key}, value: {value.__str__()}" for key, value in store.items()]
+        self.message = "\n".join(formatted_output_line)
+
+    def __init__(self, elements: List[str]):
+        self.message = "???"
+        self.__parse(elements[1:])
+
+
 class Add(Command):
     def output(self) -> Optional[str]:
         return self.message
+
 
     def __element_type(self, element: str) -> Optional[str]:
         # TODO: 別表記をクラスで表現したい
@@ -94,6 +111,8 @@ def parse_command(message_content: str) -> Command:
         return Help()
     elif "add".startswith(command):
         return Add(elements)
+    elif "list".startswith(command):
+        return ListCommand(elements)
     else:
         return UnknownCommand()
 
