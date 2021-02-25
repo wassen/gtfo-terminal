@@ -175,6 +175,14 @@ class GTFOTerminal(discord.Client):
         if not message.channel.name == "gtfo_playing":
             return
 
+        if message.content == "close":
+            # 重複
+            guild: discord.Guild = next((guild for guild in self.guilds if guild.id == Setting().guild_id[sys.argv[1]]))
+            channel: discord.TextChannel = next((channel for channel in guild.channels if channel.name == "gtfo_playing"))
+            await channel.send("UPLINK DISCONNECTED")
+            await self.close()
+            return
+
         command = parse_command(message.content)
 
         output: Optional[str] = command.output()
