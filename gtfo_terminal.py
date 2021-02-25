@@ -146,25 +146,30 @@ def parse_command(message_content: str) -> Command:
         return UnknownCommand()
 
 
+# Settingのコンストラクタにdevelop or releaseを入れるべきかな
 class Setting:
     def __init__(self):
         import yaml
 
         with open("setting.yaml") as setting_file:
             setting = yaml.safe_load(setting_file)
-            self.develop_guild_name = setting["environment"]["develop"]
-            self.release_guild_name = setting["environment"]["release"]
+            self.guild_name: Dict[str, str] = setting["environment"]["guild_name"]
+            self.guild_id: Dict[str, int] = setting["environment"]["guild_id"]
 
 
 class GTFOTerminal(discord.Client):
-    async def on_ready(self):
+    async def on_ready(self: discord.Client):
+        guild: discord.Guild = next((guild for guild in self.guilds if guild.id == Setting().guild_id[sys.argv[1]]))
+        channel: discord.TextChannel = next((channel for channel in guild.channels if channel.name == "gtfo_playing"))
+        await channel.send("UPLINK CONNECTED")
         print(f"We have logged in as {self.user}".format())
 
     async def on_message(self: discord.Client, message: discord.Message):
         if message.author == self.user:
             return
 
-        if not (sys.argv[1] == "develop" and message.guild.name == Setting().develop_guild_name or sys.argv[1] == "release" and message.guild.name == Setting().release_guild_name):
+        # 引数なしのときのエラー
+        if not message.guild.name == Setting().guild_name[sys.argv[1]]:
             return
 
         if not message.channel.name == "gtfo_playing":
