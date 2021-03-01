@@ -9,10 +9,10 @@ token:
 	@read -p "Enter Discord App Token: " token && echo $$token > token
 
 develop-run:
-	pipenv run ./gtfo_terminal.py develop
+	pipenv run ./src/gtfo_terminal.py develop
 
 release-run:
-	pipenv run ./gtfo_terminal.py release
+	pipenv run ./src/gtfo_terminal.py release
 
 mypy:
-	pipenv run mypy ./gtfo_terminal.py
+	pipenv run mypy ./src/gtfo_terminal.py

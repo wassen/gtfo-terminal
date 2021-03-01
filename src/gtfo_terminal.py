@@ -5,16 +5,9 @@ from typing import Dict, List, Optional
 
 import discord
 import sys
-
-
-class Item:
-    def __init__(
-        self,
-        id: int,
-        item_type: int,
-    ):
-        self.id = id
-        self.item_type = item_type
+import State
+import item_property
+from item_property import ItemProperty, ItemType
 
 
 store_index: int = 0
@@ -119,6 +112,51 @@ class Add(Command):
         self.__parse(elements[1:])
 
 
+# addの引数ゼロならこっちにする、のほうが良いか
+# 1とかのコマンドも含むから、すでにaddコマンドではないんだよなこれ
+class AddInteractive(Command):
+    def output(self) -> Optional[str]:
+        return self.message
+
+    def add_item(self, number: int):
+        if number in (item_type.value for item_type in ItemType):
+            self.message = "つぎー"
+        else:
+            self.message = "ないです"
+
+    def interpret_number(self, number: int):
+        if State.add_state == State.AddState.item:
+            self.add_item(number)
+        elif State.add_state == State.AddState.zone:
+            pass
+        elif State.add_state == State.AddState.container:
+            pass
+        elif State.add_state == None:
+            pass
+
+    def __init__(self, elements: List[str]):
+        if elements[0] == "add":
+            State.add_state = State.AddState.item
+            items_string: List[str] = \
+                [f"{item.value: >2}: {item.name}" for item in list(ItemType)]
+            combined_string: str = "\n".join(items_string)
+            with_code_block = f"```\n{combined_string}\n```"
+            self.message = f"どのアイテムを保管しますか？数値を入力してください\n{with_code_block}"
+        elif isinstance(number := int(elements[0]), int):
+            self.interpret_number(number)
+        else:
+            pass
+
+
+class Cancel(Command):
+    def output(self) -> Optional[str]:
+        return self.message
+
+    def __init__(self):
+        State.add_state = None
+        self.message = "キャンセルしました"
+
+
 class Help(Command):
     def output(self) -> Optional[str]:
         return read_help()
@@ -137,6 +175,8 @@ def parse_command(message_content: str) -> Command:
     if "help".startswith(command):
         return Help()
     elif "add".startswith(command):
+        return AddInteractive(elements)
+    elif command == "add":
         return Add(elements)
     elif "list".startswith(command):
         return ListCommand(elements)
@@ -181,13 +221,21 @@ class GTFOTerminal(discord.Client):
             channel: discord.TextChannel = next((channel for channel in guild.channels if channel.name == "gtfo_playing"))
             await channel.send("UPLINK DISCONNECTED")
             await self.close()
-            return
+        elif State.add_state is not None:
+            # 重複
+            # あーもうめちゃくちゃだよ
+            elements: List[str] = message.content.split(" ")
+            command = AddInteractive(elements)
 
-        command = parse_command(message.content)
+            output: Optional[str] = command.output()
+            if command.output() is not None:
+                await message.channel.send(output)
+        else:
+            command = parse_command(message.content)
 
-        output: Optional[str] = command.output()
-        if command.output() is not None:
-            await message.channel.send(output)
+            output: Optional[str] = command.output()
+            if command.output() is not None:
+                await message.channel.send(output)
 
 
 GTFOTerminal().run(read_token())
