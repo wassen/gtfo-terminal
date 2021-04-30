@@ -14,11 +14,6 @@ store_index: int = 0
 store: Dict[int, Dict[str, List[str]]] = {}
 
 
-def read_token() -> str:
-    with open("token") as token_file:
-        return token_file.read()
-
-
 def read_help() -> str:
     with open("help") as help_file:
         return help_file.read()
@@ -237,5 +232,3 @@ class GTFOTerminal(discord.Client):
             if command.output() is not None:
                 await message.channel.send(output)
 
-
-GTFOTerminal().run(read_token())
