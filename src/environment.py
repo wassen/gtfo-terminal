@@ -7,4 +7,3 @@ from enum import auto, Enum
 class Env(Enum):
     development = auto()
     release = auto()
-

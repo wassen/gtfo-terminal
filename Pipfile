@@ -7,8 +7,12 @@ name = "pypi"
 "discord.py" = "*"
 mypy = "*"
 pyyaml = "*"
+black = "*"
 
 [dev-packages]
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true

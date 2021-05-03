@@ -15,7 +15,7 @@ class TestSendBye(unittest.TestCase):
 
         self.assertEqual(
             responder.sendRequest(Request.bye).response_string(),
-            GoodBye().response_string()
+            GoodBye().response_string(),
         )
 
 
@@ -25,10 +25,9 @@ class TestSendAdd(unittest.TestCase):
 
         self.assertEqual(
             responder.sendRequest(Request.add).response_string(),
-            Add().response_string()
+            Add().response_string(),
         )
 
 
 if __name__ == "__main__":
     unittest.main()
-

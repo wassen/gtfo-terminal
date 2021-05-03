@@ -20,3 +20,7 @@ mypy:
 
 test:
 	pipenv run python -m unittest test/test_gtfo_terminal.py
+
+format:
+	pipenv run black .
+

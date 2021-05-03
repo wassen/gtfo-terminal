@@ -11,4 +11,3 @@ def __read_token() -> str:
 
 if __name__ == "__main__":
     GTFOTerminal().run(__read_token())
-

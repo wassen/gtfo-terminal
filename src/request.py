@@ -18,4 +18,3 @@ class Request(Enum):
             return Request.bye
         elif messageContent in addCommand:
             return Request.add
-

@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import sys
 from typing import Dict, List, Optional
 
 import discord
-import sys
+
 from . import state
+from .environment import Env
 from .item_property import ItemType
 from .request import Request
 from .response import Response
 from .response.add import Add
 from .response.good_bye import GoodBye
-from .environment import Env
-
 
 store_index: int = 0
 store: Dict[int, Dict[str, List[str]]] = {}
@@ -37,7 +37,9 @@ class ListCommand(Command):
         return self.message
 
     def __parse(self, elements: List[str]):
-        formatted_output_line = [f"index: {key}, value: {value.__str__()}" for key, value in store.items()]
+        formatted_output_line = [
+            f"index: {key}, value: {value.__str__()}" for key, value in store.items()
+        ]
         self.message = "\n".join(formatted_output_line)
 
     def __init__(self, elements: List[str]):
@@ -135,8 +137,9 @@ class AddInteractive(Command):
     def __init__(self, elements: List[str]):
         if elements[0] == "add":
             state.add_state = state.AddState.item
-            items_string: List[str] = \
-                [f"{item.value: >2}: {item.name}" for item in list(ItemType)]
+            items_string: List[str] = [
+                f"{item.value: >2}: {item.name}" for item in list(ItemType)
+            ]
             combined_string: str = "\n".join(items_string)
             with_code_block = f"```\n{combined_string}\n```"
             self.message = f"どのアイテムを保管しますか？数値を入力してください\n{with_code_block}"
@@ -197,8 +200,16 @@ class Setting:
 
 class GTFOTerminal(discord.Client):
     async def on_ready(self: discord.Client):
-        guild: discord.Guild = next((guild for guild in self.guilds if guild.id == Setting().guild_id[sys.argv[1]]))
-        channel: discord.TextChannel = next((channel for channel in guild.channels if channel.name == "gtfo_playing"))
+        guild: discord.Guild = next(
+            (
+                guild
+                for guild in self.guilds
+                if guild.id == Setting().guild_id[sys.argv[1]]
+            )
+        )
+        channel: discord.TextChannel = next(
+            (channel for channel in guild.channels if channel.name == "gtfo_playing")
+        )
         await channel.send("UPLINK CONNECTED")
         print(f"We have logged in as {self.user}".format())
 
@@ -217,9 +228,7 @@ class GTFOTerminal(discord.Client):
 
         response = Responder().sendRequest(request)
 
-        await message.channel.send(
-            response.response_string()
-        )
+        await message.channel.send(response.response_string())
 
         if response.should_close:
             await self.close()
@@ -241,15 +250,14 @@ class GTFOTerminal(discord.Client):
         #         await message.channel.send(output)
 
 
-class AddResponder():
+class AddResponder:
     pass
 
 
-class Responder():
+class Responder:
     def sendRequest(self, request: Request) -> Response:
         if request == Request.bye:
             return GoodBye()
         elif request == Request.add:
             AddResponder()
             return Add()
-

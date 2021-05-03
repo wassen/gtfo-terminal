@@ -12,4 +12,3 @@ class AddState(Enum):
 
 
 add_state: Optional[AddState] = None
-
