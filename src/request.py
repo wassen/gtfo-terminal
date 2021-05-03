@@ -7,11 +7,15 @@ from enum import auto, Enum
 
 class Request(Enum):
     bye = auto()
-
-    byeCommand = ["bye", "quit", "close", "disconnect"]
+    add = auto()
 
     @classmethod
     def fromContent(cls, messageContent: str) -> Request:
-        if messageContent in cls.byeCommand:
+        byeCommand = ["bye", "quit", "close", "disconnect"]
+        addCommand = ["add"]
+
+        if messageContent in byeCommand:
             return Request.bye
+        elif messageContent in addCommand:
+            return Request.add
 

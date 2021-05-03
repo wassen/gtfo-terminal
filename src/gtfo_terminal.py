@@ -6,10 +6,10 @@ from typing import Dict, List, Optional
 import discord
 import sys
 from . import state
-from . import item_property
-from .item_property import ItemProperty, ItemType
 from .request import Request
-from .response import good_bye, Response
+from .response import Response
+from .response.add import Add
+from .response.good_bye import GoodBye
 from .environment import Env
 
 
@@ -69,7 +69,7 @@ class Delete(Command):
         self.__parse(elements[1:])
 
 
-class Add(Command):
+class AddOld(Command):
     def output(self) -> Optional[str]:
         return self.message
 
@@ -123,18 +123,18 @@ class AddInteractive(Command):
             self.message = "ないです"
 
     def interpret_number(self, number: int):
-        if State.add_state == State.AddState.item:
+        if state.add_state == state.AddState.item:
             self.add_item(number)
-        elif State.add_state == State.AddState.zone:
+        elif state.add_state == state.AddState.zone:
             pass
-        elif State.add_state == State.AddState.container:
+        elif state.add_state == state.AddState.container:
             pass
-        elif State.add_state == None:
+        elif state.add_state == None:
             pass
 
     def __init__(self, elements: List[str]):
         if elements[0] == "add":
-            State.add_state = State.AddState.item
+            state.add_state = state.AddState.item
             items_string: List[str] = \
                 [f"{item.value: >2}: {item.name}" for item in list(ItemType)]
             combined_string: str = "\n".join(items_string)
@@ -151,7 +151,7 @@ class Cancel(Command):
         return self.message
 
     def __init__(self):
-        State.add_state = None
+        state.add_state = None
         self.message = "キャンセルしました"
 
 
@@ -175,7 +175,7 @@ def parse_command(message_content: str) -> Command:
     elif "add".startswith(command):
         return AddInteractive(elements)
     elif command == "add":
-        return Add(elements)
+        return AddOld(elements)
     elif "list".startswith(command):
         return ListCommand(elements)
     elif "delete".startswith(command):
@@ -215,36 +215,41 @@ class GTFOTerminal(discord.Client):
 
         request: Request = Request.fromContent(message.content)
 
-        if request == Request.bye:
-            # 重複
-            guild: discord.Guild = next((guild for guild in self.guilds if guild.id == Setting().guild_id[sys.argv[1]]))
-            channel: discord.TextChannel = next((channel for channel in guild.channels if channel.name == "gtfo_playing"))
-            await channel.send(
-                good_bye.GoodBye().response_string()
-            )
+        response = Responder().sendRequest(request)
+
+        await message.channel.send(
+            response.response_string()
+        )
+
+        if response.should_close:
             await self.close()
-        elif State.add_state is not None:
-            # 重複
-            # あーもうめちゃくちゃだよ
-            elements: List[str] = message.content.split(" ")
-            command = AddInteractive(elements)
 
-            output: Optional[str] = command.output()
-            if command.output() is not None:
-                await message.channel.send(output)
-        else:
-            command = parse_command(message.content)
+        # elif state.add_state is not None:
+        #     # 重複
+        #     # あーもうめちゃくちゃだよ
+        #     elements: List[str] = message.content.split(" ")
+        #     command = AddInteractive(elements)
 
-            output: Optional[str] = command.output()
-            if command.output() is not None:
-                await message.channel.send(output)
+        #     output: Optional[str] = command.output()
+        #     if command.output() is not None:
+        #         await message.channel.send(output)
+        # else:
+        #     command = parse_command(message.content)
+
+        #     output: Optional[str] = command.output()
+        #     if command.output() is not None:
+        #         await message.channel.send(output)
+
+
+class AddResponder():
+    pass
 
 
 class Responder():
     def sendRequest(self, request: Request) -> Response:
         if request == Request.bye:
-            return good_bye.GoodBye()
-
-    def __init__(self, env: Env):
-        self.env = env
+            return GoodBye()
+        elif request == Request.add:
+            AddResponder()
+            return Add()
 

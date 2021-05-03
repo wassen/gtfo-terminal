@@ -9,13 +9,14 @@ token:
 	@read -p "Enter Discord App Token: " token && echo $$token > token
 
 develop-run:
-	pipenv run ./src/entry_point.py develop
+	pipenv run ./entry_point.py develop
 
 release-run:
-	pipenv run ./src/entry_point.py release
+	pipenv run ./entry_point.py release
 
 mypy:
-	pipenv run mypy ./src/gtfo_terminal.py
+	-pipenv run mypy ./entry_point.py
+	-pipenv run mypy ./test/test_gtfo_terminal.py
 
 test:
 	pipenv run python -m unittest test/test_gtfo_terminal.py
