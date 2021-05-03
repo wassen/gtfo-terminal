@@ -5,6 +5,7 @@ import unittest
 from src.gtfo_terminal import Responder
 from src.environment import Env
 from src.request import Request
+from src.response import good_bye
 
 
 class TestGTFOTerminal(unittest.TestCase):
@@ -12,8 +13,8 @@ class TestGTFOTerminal(unittest.TestCase):
         responder = Responder(env=Env.development)
 
         self.assertEqual(
-            responder.sendRequest(Request.hello).response_string(),
-            "bye"
+            responder.sendRequest(Request.bye).response_string(),
+            good_bye.GoodBye().response_string()
         )
 
 

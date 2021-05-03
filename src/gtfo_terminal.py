@@ -213,11 +213,15 @@ class GTFOTerminal(discord.Client):
         if not message.channel.name == "gtfo_playing":
             return
 
-        if message.content == "close":
+        request: Request = Request.fromContent(message.content)
+
+        if request == Request.bye:
             # 重複
             guild: discord.Guild = next((guild for guild in self.guilds if guild.id == Setting().guild_id[sys.argv[1]]))
             channel: discord.TextChannel = next((channel for channel in guild.channels if channel.name == "gtfo_playing"))
-            await channel.send("UPLINK DISCONNECTED")
+            await channel.send(
+                good_bye.GoodBye().response_string()
+            )
             await self.close()
         elif State.add_state is not None:
             # 重複
@@ -238,7 +242,7 @@ class GTFOTerminal(discord.Client):
 
 class Responder():
     def sendRequest(self, request: Request) -> Response:
-        if request == Request.hello:
+        if request == Request.bye:
             return good_bye.GoodBye()
 
     def __init__(self, env: Env):

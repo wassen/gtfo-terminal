@@ -6,4 +6,4 @@ from . import Response
 
 class GoodBye(Response):
     def response_string(self) -> str:
-        return "bye"
+        return "UPLINK DISCONNECTED"
