@@ -8,6 +8,7 @@ name = "pypi"
 mypy = "*"
 pyyaml = "*"
 black = "*"
+isort = "*"
 
 [dev-packages]
 

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from . import Response
 from typing import List
+
 from ..item_property import ItemType
+from . import Response
 
 
 class Add(Response):

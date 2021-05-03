@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from typing import Dict, Optional
 from enum import Enum, auto
+from typing import Dict, Optional
 
 
 class ItemProperty(Enum):

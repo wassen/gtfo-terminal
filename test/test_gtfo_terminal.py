@@ -2,11 +2,12 @@
 # -*- coding:utf-8 -*-
 
 import unittest
-from src.gtfo_terminal import Responder
+
 from src.environment import Env
+from src.gtfo_terminal import Responder
 from src.request import Request
-from src.response.good_bye import GoodBye
 from src.response.add import Add
+from src.response.good_bye import GoodBye
 
 
 class TestSendBye(unittest.TestCase):

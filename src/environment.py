@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from enum import auto, Enum
+from enum import Enum, auto
 
 
 class Env(Enum):

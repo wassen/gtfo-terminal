@@ -23,4 +23,5 @@ test:
 
 format:
 	pipenv run black .
+	pipenv run isort .
 
