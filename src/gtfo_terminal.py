@@ -6,6 +6,7 @@ from typing import Dict, List, Optional
 import discord
 import sys
 from . import state
+from .item_property import ItemType
 from .request import Request
 from .response import Response
 from .response.add import Add
@@ -73,7 +74,6 @@ class AddOld(Command):
     def output(self) -> Optional[str]:
         return self.message
 
-
     def __element_type(self, element: str) -> Optional[str]:
         # TODO: 別表記をクラスで表現したい
         resources: List[str] = ["ammo", "medi", "tool"]
@@ -129,7 +129,7 @@ class AddInteractive(Command):
             pass
         elif state.add_state == state.AddState.container:
             pass
-        elif state.add_state == None:
+        elif state.add_state is None:
             pass
 
     def __init__(self, elements: List[str]):
