@@ -1,4 +1,4 @@
-.PHONY: develop-run release-run pipenv mypy
+.PHONY: develop-run release-run pipenv mypy test
 
 default: pipenv token
 
@@ -16,3 +16,6 @@ release-run:
 
 mypy:
 	pipenv run mypy ./src/gtfo_terminal.py
+
+test:
+	pipenv run python -m unittest test/test_gtfo_terminal.py

@@ -5,9 +5,12 @@ from typing import Dict, List, Optional
 
 import discord
 import sys
-import State
-import item_property
-from item_property import ItemProperty, ItemType
+from . import state
+from . import item_property
+from .item_property import ItemProperty, ItemType
+from .request import Request
+from .response import good_bye, Response
+from .environment import Env
 
 
 store_index: int = 0
@@ -231,4 +234,13 @@ class GTFOTerminal(discord.Client):
             output: Optional[str] = command.output()
             if command.output() is not None:
                 await message.channel.send(output)
+
+
+class Responder():
+    def sendRequest(self, request: Request) -> Response:
+        if request == Request.hello:
+            return good_bye.GoodBye()
+
+    def __init__(self, env: Env):
+        self.env = env
 
