@@ -5,6 +5,7 @@ from enum import Enum, auto
 from typing import Optional
 
 
+# deprecated
 class AddState(Enum):
     item = auto()
     zone = auto()

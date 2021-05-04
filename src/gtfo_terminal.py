@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+
 import sys
+from enum import Enum, auto
 from typing import Dict, List, Optional, cast
 
 import discord
 
 from . import state
 from .environment import Env
+from .item.item import Item
 from .item_property import ItemType
-from .request import Request
+from .request import CommandRequest, NumberRequest, Request
 from .response import Response
-from .response.add import Add
+from .response.add import AddInAddition, AddItemCount, AddItemType
 from .response.good_bye import GoodBye
 
 store_index: int = 0
@@ -247,7 +250,10 @@ class GTFOTerminal(discord.Client):
         if request is None:
             return
 
-        response = Responder().sendRequest(request)
+        response = Responder().send_request(request)
+
+        if response is None:
+            return
 
         await message.channel.send(response.response_string())
 
@@ -272,15 +278,66 @@ class GTFOTerminal(discord.Client):
 
 
 class AddResponder:
-    pass
+    class State(Enum):
+        item_type = auto()
+        item_count = auto()
+        editing = auto()
+        zone_number = auto()
+        container_type = auto()
+        container_number = auto()
+
+    current_state: State = State.item_type
+    item = Item()
+
+    def response(self) -> Optional[Response]:
+        if self.current_state == self.State.item_type:
+            return AddItemType()
+        elif self.current_state == self.State.item_count:
+            return AddItemCount()
+        else:
+            return None
+
+    def sendNumber(self, number: int) -> None:
+        if self.current_state == self.State.item_type:
+            self.item.item_type = ItemType(number)
+            self.current_state = self.State.item_count
+        elif self.current_state == self.State.item_count:
+            self.item.item_count = number
+            self.current_state = self.State.editing
+        elif self.current_state == self.State.editing:
+            self.current_state = self.State.editing
+
+    def __init__(self) -> None:
+        self.curernt_state = self.State.item_type
+
+
+add_responder: Optional[AddResponder] = None
+
+
+# ストアは別モジュールにしたい
+def clear_add_responder() -> None:
+    global add_responder
+    add_responder = None
 
 
 class Responder:
-    def sendRequest(self, request: Request) -> Response:
-        if request == Request.bye:
+    def send_request(self, request: Request) -> Optional[Response]:
+        global add_responder
+
+        if request == CommandRequest.bye:
             return GoodBye()
-        elif request == Request.add:
-            AddResponder()
-            return Add()
+        elif request == CommandRequest.add:
+            if add_responder is None:
+                add_responder = AddResponder()
+                return add_responder.response()
+            else:
+                return AddInAddition()
+        elif type(request) is NumberRequest:
+            numberRequest = cast(NumberRequest, request)
+            if (add_responder := add_responder) is not None:
+                add_responder.sendNumber(numberRequest.value)
+                return add_responder.response()
+            else:
+                return None
         else:
             raise Exception()
