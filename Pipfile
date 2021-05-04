@@ -9,6 +9,7 @@ mypy = "*"
 pyyaml = "*"
 black = "*"
 isort = "*"
+"discord.py-stubs" = "*"
 
 [dev-packages]
 

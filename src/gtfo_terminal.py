@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import sys
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 import discord
 
@@ -24,19 +24,19 @@ def read_help() -> str:
 
 
 class Command:
-    def output(self) -> Optional[int]:
+    def output(self) -> Optional[str]:
         pass
 
 
 class ListCommand(Command):
     # output じゃなくてmessage見ればいいのでは
-    def output(self) -> Optional[int]:
+    def output(self) -> Optional[str]:
         if len(self.message) == 0:
             return "エントリは空です"
 
         return self.message
 
-    def __parse(self, elements: List[str]):
+    def __parse(self, elements: List[str]) -> None:
         formatted_output_line = [
             f"index: {key}, value: {value.__str__()}" for key, value in store.items()
         ]
@@ -48,10 +48,10 @@ class ListCommand(Command):
 
 
 class Delete(Command):
-    def output(self) -> Optional[int]:
+    def output(self) -> Optional[str]:
         return self.message
 
-    def __parse(self, elements: List[str]):
+    def __parse(self, elements: List[str]) -> None:
         if len(elements) == 0:
             self.message = "indexを指定してください ex) delete 0"
             return
@@ -67,7 +67,7 @@ class Delete(Command):
         else:
             self.message = f"以下のアイテムを削除しました{deletedItem}"
 
-    def __init__(self, elements: List[str]):
+    def __init__(self, elements: List[str]) -> None:
         self.message = "???"
         self.__parse(elements[1:])
 
@@ -92,22 +92,27 @@ class AddOld(Command):
         else:
             return None
 
-    def __parse(self, elements: List[str]):
+    def __parse(self, elements: List[str]) -> None:
         if len(elements) == 0:
             self.message = "ex) add medi_4 locker_0 zone_1 \n 入力可能文字は, ammo, medi, tool, fog, c-form, melter, mineです"
             return
 
-        storingItem = {
+        storingItems: Dict[Optional[str], List[str]] = {
             self.__element_type(element): element.split("_") for element in elements
+        }
+        storingItemsFilterNotNull = {
+            key: value for key, value in storingItems.items() if key is not None
         }
 
         global store, store_index
-        store[store_index] = storingItem
+        store[store_index] = storingItemsFilterNotNull
 
-        self.message = f"index: {store_index}, value{storingItem.__str__()}"
+        self.message = (
+            f"index: {store_index}, value{storingItemsFilterNotNull.__str__()}"
+        )
         store_index += 1
 
-    def __init__(self, elements: List[str]):
+    def __init__(self, elements: List[str]) -> None:
         self.message = "???"
         self.__parse(elements[1:])
 
@@ -118,13 +123,13 @@ class AddInteractive(Command):
     def output(self) -> Optional[str]:
         return self.message
 
-    def add_item(self, number: int):
+    def add_item(self, number: int) -> None:
         if number in (item_type.value for item_type in ItemType):
             self.message = "つぎー"
         else:
             self.message = "ないです"
 
-    def interpret_number(self, number: int):
+    def interpret_number(self, number: int) -> None:
         if state.add_state == state.AddState.item:
             self.add_item(number)
         elif state.add_state == state.AddState.zone:
@@ -134,11 +139,11 @@ class AddInteractive(Command):
         elif state.add_state is None:
             pass
 
-    def __init__(self, elements: List[str]):
+    def __init__(self, elements: List[str]) -> None:
         if elements[0] == "add":
             state.add_state = state.AddState.item
             items_string: List[str] = [
-                f"{item.value: >2}: {item.name}" for item in list(ItemType)
+                f"{item.value: >2}: {item.itemName}" for item in list(ItemType)
             ]
             combined_string: str = "\n".join(items_string)
             with_code_block = f"```\n{combined_string}\n```"
@@ -153,7 +158,7 @@ class Cancel(Command):
     def output(self) -> Optional[str]:
         return self.message
 
-    def __init__(self):
+    def __init__(self) -> None:
         state.add_state = None
         self.message = "キャンセルしました"
 
@@ -163,7 +168,7 @@ class Help(Command):
         return read_help()
 
 
-class UnknownCommand:
+class UnknownCommand(Command):
     def output(self) -> Optional[str]:
         pass
 
@@ -189,7 +194,7 @@ def parse_command(message_content: str) -> Command:
 
 # Settingのコンストラクタにdevelop or releaseを入れるべきかな
 class Setting:
-    def __init__(self):
+    def __init__(self) -> None:
         import yaml
 
         with open("setting.yaml") as setting_file:
@@ -199,7 +204,7 @@ class Setting:
 
 
 class GTFOTerminal(discord.Client):
-    async def on_ready(self: discord.Client):
+    async def on_ready(self: discord.Client) -> None:
         guild: discord.Guild = next(
             (
                 guild
@@ -207,24 +212,40 @@ class GTFOTerminal(discord.Client):
                 if guild.id == Setting().guild_id[sys.argv[1]]
             )
         )
-        channel: discord.TextChannel = next(
-            (channel for channel in guild.channels if channel.name == "gtfo_playing")
+        channel = next(
+            (
+                channel
+                for channel in guild.channels
+                if channel.name == "gtfo_playing"
+                and type(channel) == discord.TextChannel
+            )
         )
-        await channel.send("UPLINK CONNECTED")
+        textChannel = cast(discord.TextChannel, channel)
+
+        await textChannel.send("UPLINK CONNECTED")
         print(f"We have logged in as {self.user}".format())
 
-    async def on_message(self: discord.Client, message: discord.Message):
+    async def on_message(self: discord.Client, message: discord.Message) -> None:
         if message.author == self.user:
             return
 
+        if (guild := message.guild) is None:
+            return
+
         # 引数なしのときのエラー
-        if not message.guild.name == Setting().guild_name[sys.argv[1]]:
+        if not guild.name == Setting().guild_name[sys.argv[1]]:
             return
 
-        if not message.channel.name == "gtfo_playing":
+        if type(channel := message.channel) != discord.TextChannel:
+            return
+        textChannel = cast(discord.TextChannel, channel)
+
+        if not textChannel.name == "gtfo_playing":
             return
 
-        request: Request = Request.fromContent(message.content)
+        request = Request.fromContent(message.content)
+        if request is None:
+            return
 
         response = Responder().sendRequest(request)
 
@@ -261,3 +282,5 @@ class Responder:
         elif request == Request.add:
             AddResponder()
             return Add()
+        else:
+            raise Exception()

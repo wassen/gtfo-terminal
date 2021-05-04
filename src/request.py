@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
+from typing import Optional
 
 
 class Request(Enum):
@@ -11,7 +12,7 @@ class Request(Enum):
     add = auto()
 
     @classmethod
-    def fromContent(cls, messageContent: str) -> Request:
+    def fromContent(cls, messageContent: str) -> Optional[Request]:
         byeCommand = ["bye", "quit", "close", "disconnect"]
         addCommand = ["add"]
 
@@ -19,3 +20,5 @@ class Request(Enum):
             return Request.bye
         elif messageContent in addCommand:
             return Request.add
+        else:
+            return None

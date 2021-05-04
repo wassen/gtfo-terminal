@@ -28,7 +28,7 @@ class ItemType(ItemProperty):
     c_form_tripmine = 13
 
     @property
-    def name(self) -> str:
+    def itemName(self) -> str:
         if self == ItemType.ammo:
             return "Ammunition Pack"
         elif self == ItemType.medi:
@@ -37,3 +37,5 @@ class ItemType(ItemProperty):
             return "Tool Refill Pack"
         elif self == ItemType.disinfection:
             return "Disinfection Pack"
+        else:
+            return "None"
