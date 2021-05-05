@@ -7,6 +7,7 @@ from typing import cast
 from src.extension import unwrap
 from src.gtfo_terminal import Responder, clear_add_responder
 from src.request import CommandRequest, NumberRequest, Request
+from src.response import Response
 from src.response.choices import (AddContainerNumberResponse,
                                   AddContainerTypeResponse, AddEditResponse,
                                   AddInAdditionResponse, AddItemCountResponse,
@@ -20,10 +21,10 @@ class TestSendBye(unittest.TestCase):
 
         response = responder.send_request(CommandRequest.bye)
         self.assertNotEqual(response, None)
-        response = cast(str, response)
+        response = cast(Response, response)
 
         self.assertEqual(
-            response,
+            response.response_string(),
             GoodByeResponse().response_string(),
         )
 
@@ -42,7 +43,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 何を追加しますか？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddItemTypeResponse().response_string(),
         )
 
@@ -50,7 +51,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 追加中にaddしないで
         self.assertEqual(
-            response,
+            response.response_string(),
             AddInAdditionResponse().response_string(),
         )
 
@@ -58,7 +59,7 @@ class TestSendAdd(unittest.TestCase):
 
         # アイテムの数は？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddItemCountResponse().response_string(),
         )
 
@@ -66,7 +67,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 何編集する？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddEditResponse().response_string(),
         )
 
@@ -74,7 +75,7 @@ class TestSendAdd(unittest.TestCase):
 
         # ゾーン番号は？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddZoneNumberResponse().response_string(),
         )
 
@@ -82,7 +83,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 何編集する？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddEditResponse().response_string(),
         )
 
@@ -90,7 +91,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 入れ物タイプは？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddContainerTypeResponse().response_string(),
         )
 
@@ -98,7 +99,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 入れ物番号は？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddContainerNumberResponse().response_string(),
         )
 
@@ -106,7 +107,7 @@ class TestSendAdd(unittest.TestCase):
 
         # 何編集する？
         self.assertEqual(
-            response,
+            response.response_string(),
             AddEditResponse().response_string(),
         )
 

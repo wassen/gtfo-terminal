@@ -4,12 +4,16 @@ from typing import List, Optional, Type
 from . import Response
 
 
-class AddZoneNumberResponse(Response):
+class AddResponse(Response):
+    complete = False
+
+
+class AddZoneNumberResponse(AddResponse):
     def response_string(self) -> str:
         return "ゾーン番号はいくつですか？数値を入力してください"
 
 
-class AddItemTypeResponse(Response):
+class AddItemTypeResponse(AddResponse):
     def response_string(self) -> str:
         items_string: List[str] = [
             f"{item.value: >2}: {item.itemName}" for item in list(AddItemTypeChoice)
@@ -19,17 +23,17 @@ class AddItemTypeResponse(Response):
         return f"どのアイテムを保管しますか？数値を入力してください\n{with_code_block}"
 
 
-class AddItemCountResponse(Response):
+class AddItemCountResponse(AddResponse):
     def response_string(self) -> str:
         return "何個入りですか？数値を入力してください"
 
 
-class AddInAdditionResponse(Response):
+class AddInAdditionResponse(AddResponse):
     def response_string(self) -> str:
         return "アイテム追加中です"
 
 
-class AddEditResponse(Response):
+class AddEditResponse(AddResponse):
     def response_string(self) -> str:
         items_string: List[str] = [
             f"{item.value}: {item.itemName}" for item in list(AddEditChoice)
@@ -39,7 +43,7 @@ class AddEditResponse(Response):
         return f"何を編集しますか？数値を入力してください\n{with_code_block}"
 
 
-class AddContainerTypeResponse(Response):
+class AddContainerTypeResponse(AddResponse):
     def response_string(self) -> str:
         items_string: List[str] = [
             f"{item.value: >2}: {item.itemName}"
@@ -50,12 +54,21 @@ class AddContainerTypeResponse(Response):
         return f"入れ物のタイプを数値を入力してください\n{with_code_block}"
 
 
-class AddContainerNumberResponse(Response):
+class AddContainerNumberResponse(AddResponse):
     def response_string(self) -> str:
         return f"入れ物の番号はいくつですか？数値で入力してください（直置きのときもなんか入力しといて）"
 
 
+class AddCompleteResponse(AddResponse):
+    complete = True
+
+    def response_string(self) -> str:
+        # アイテムの詳細をRespondしてほしい気持ち
+        return f"完了しました"
+
+
 class AddState(Enum):
+    idle = auto()
     item_type = auto()
     item_count = auto()
     edit = auto()
@@ -63,19 +76,21 @@ class AddState(Enum):
     container_type = auto()
     container_number = auto()
 
-    def response(self) -> str:
+    def response(self) -> AddResponse:
+        if self == AddState.idle:
+            return AddCompleteResponse()
         if self == AddState.item_type:
-            return AddItemTypeResponse().response_string()
+            return AddItemTypeResponse()
         elif self == AddState.item_count:
-            return AddItemCountResponse().response_string()
+            return AddItemCountResponse()
         elif self == AddState.edit:
-            return AddEditResponse().response_string()
+            return AddEditResponse()
         elif self == AddState.zone_number:
-            return AddZoneNumberResponse().response_string()
+            return AddZoneNumberResponse()
         elif self == AddState.container_type:
-            return AddContainerTypeResponse().response_string()
+            return AddContainerTypeResponse()
         elif self == AddState.container_number:
-            return AddContainerNumberResponse().response_string()
+            return AddContainerNumberResponse()
         else:
             raise Exception()
 
@@ -155,10 +170,10 @@ class AddEditChoice(Choice, Enum):
         else:
             raise Exception()
 
-    def next_state(self) -> Optional[AddState]:
+    def next_state(self) -> AddState:
         if self == AddEditChoice.complete:
             # Noneじゃなくて平常時も状態として管理しない？
-            return None
+            return AddState.idle
         elif self == AddEditChoice.zone:
             return AddState.zone_number
         elif self == AddEditChoice.container:

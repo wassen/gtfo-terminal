@@ -16,7 +16,7 @@ from .response.choices import (AddContainerNumberResponse,
                                AddContainerTypeResponse, AddEditChoice,
                                AddEditResponse, AddInAdditionResponse,
                                AddItemCountResponse, AddItemTypeChoice,
-                               AddItemTypeResponse, AddState)
+                               AddItemTypeResponse, AddResponse, AddState)
 from .response.good_bye import GoodByeResponse
 
 store_index: int = 0
@@ -260,11 +260,10 @@ class GTFOTerminal(discord.Client):
         if response is None:
             return
 
-        await message.channel.send(response)
+        await message.channel.send(response.response_string())
 
         # reponseをobjectにしたい唯一の理由
-        # if response.should_close:
-        if response == "UPLINK DISCONNECTED":
+        if response.should_close:
             await self.close()
 
         # elif state.add_state is not None:
@@ -288,18 +287,18 @@ class AddResponder:
     current_state: AddState = AddState.item_type
     item = Item()
 
-    def firstResponse(self) -> str:
-        return AddItemTypeResponse().response_string()
+    def firstResponse(self) -> AddResponse:
+        return AddItemTypeResponse()
 
-    def sendNumber(self, number: int) -> Optional[str]:
+    def sendNumber(self, number: int) -> Optional[AddResponse]:
         if self.current_state == AddState.item_type:
             self.item.item_type = AddItemTypeChoice(number)
             self.current_state = AddState.item_count
-            return AddItemCountResponse().response_string()
+            return AddItemCountResponse()
         elif self.current_state == AddState.item_count:
             self.item.item_count = number
             self.current_state = AddState.edit
-            return AddEditResponse().response_string()
+            return AddEditResponse()
         elif self.current_state == AddState.edit:
             if (next_state := AddEditChoice(number).next_state()) is None:
                 return "ぬぬ"
@@ -309,15 +308,15 @@ class AddResponder:
         elif self.current_state == AddState.zone_number:
             self.item.zone_number = number
             self.current_state = AddState.edit
-            return AddEditResponse().response_string()
+            return AddEditResponse()
         elif self.current_state == AddState.container_type:
             self.item.container_type = AddContainerTypeChoice(number)
             self.current_state = AddState.container_number
-            return AddContainerNumberResponse().response_string()
+            return AddContainerNumberResponse()
         elif self.current_state == AddState.container_number:
             self.item.container_number = number
             self.current_state = AddState.edit
-            return AddEditResponse().response_string()
+            return AddEditResponse()
         else:
             return None
 
@@ -335,22 +334,29 @@ def clear_add_responder() -> None:
 
 
 class Responder:
-    def send_request(self, request: Request) -> Optional[str]:
+    def send_request(self, request: Request) -> Optional[Response]:
         global add_responder
 
         if request == CommandRequest.bye:
-            return GoodByeResponse().response_string()
+            return GoodByeResponse()
         elif request == CommandRequest.add:
             if add_responder is None:
                 add_responder = AddResponder()
                 # firstResponseとAddInAdditionで一貫性がない
                 return add_responder.firstResponse()
             else:
-                return AddInAdditionResponse().response_string()
+                return AddInAdditionResponse()
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
-            if (add_responder := add_responder) is not None:
-                return add_responder.sendNumber(numberRequest.value)
+
+            if (add_responder := add_responder) is None:
+                return None
+
+            if (response := add_responder.sendNumber(numberRequest.value)) is not None:
+                if response.complete:
+                    add_responder = None
+
+                return response
             else:
                 return None
         else:
