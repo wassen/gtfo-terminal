@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-
-
 import sys
 from enum import Enum, auto
 from typing import Dict, List, Optional, cast
@@ -13,9 +11,10 @@ from .environment import Env
 from .item.item import Item
 from .item_property import ItemType
 from .request import CommandRequest, NumberRequest, Request
-from .response import Response
-from .response.add import AddInAddition, AddItemCount, AddItemType
-from .response.good_bye import GoodBye
+from .response.choices import (AddEditChoice, AddEditResponse,
+                               AddInAdditionResponse, AddItemCountResponse,
+                               AddItemTypeResponse, AddState)
+from .response.good_bye import GoodByeResponse
 
 store_index: int = 0
 store: Dict[int, Dict[str, List[str]]] = {}
@@ -255,9 +254,11 @@ class GTFOTerminal(discord.Client):
         if response is None:
             return
 
-        await message.channel.send(response.response_string())
+        await message.channel.send(response)
 
-        if response.should_close:
+        # reponseをobjectにしたい唯一の理由
+        # if response.should_close:
+        if response == "UPLINK DISCONNECTED":
             await self.close()
 
         # elif state.add_state is not None:
@@ -278,37 +279,32 @@ class GTFOTerminal(discord.Client):
 
 
 class AddResponder:
-    class State(Enum):
-        item_type = auto()
-        item_count = auto()
-        editing = auto()
-        zone_number = auto()
-        container_type = auto()
-        container_number = auto()
-
-    current_state: State = State.item_type
+    current_state: AddState = AddState.item_type
     item = Item()
 
-    def response(self) -> Optional[Response]:
-        if self.current_state == self.State.item_type:
-            return AddItemType()
-        elif self.current_state == self.State.item_count:
-            return AddItemCount()
+    def firstResponse(self) -> str:
+        return AddItemTypeResponse().response_string()
+
+    def sendNumber(self, number: int) -> Optional[str]:
+        if self.current_state == AddState.item_type:
+            self.item.item_type = ItemType(number)
+            self.current_state = AddState.item_count
+            return AddItemCountResponse().response_string()
+        elif self.current_state == AddState.item_count:
+            self.item.item_count = number
+            self.current_state = AddState.edit
+            return AddEditResponse().response_string()
+        elif self.current_state == AddState.edit:
+            if (next_state := AddEditChoice(number).next_state()) is not None:
+                self.current_state = next_state
+                return next_state.response()
+            else:
+                return "nu"
         else:
             return None
 
-    def sendNumber(self, number: int) -> None:
-        if self.current_state == self.State.item_type:
-            self.item.item_type = ItemType(number)
-            self.current_state = self.State.item_count
-        elif self.current_state == self.State.item_count:
-            self.item.item_count = number
-            self.current_state = self.State.editing
-        elif self.current_state == self.State.editing:
-            self.current_state = self.State.editing
-
     def __init__(self) -> None:
-        self.curernt_state = self.State.item_type
+        self.curernt_state = AddState.item_type
 
 
 add_responder: Optional[AddResponder] = None
@@ -321,22 +317,22 @@ def clear_add_responder() -> None:
 
 
 class Responder:
-    def send_request(self, request: Request) -> Optional[Response]:
+    def send_request(self, request: Request) -> Optional[str]:
         global add_responder
 
         if request == CommandRequest.bye:
-            return GoodBye()
+            return GoodByeResponse().response_string()
         elif request == CommandRequest.add:
             if add_responder is None:
                 add_responder = AddResponder()
-                return add_responder.response()
+                # firstResponseとAddInAdditionで一貫性がない
+                return add_responder.firstResponse()
             else:
-                return AddInAddition()
+                return AddInAdditionResponse().response_string()
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
             if (add_responder := add_responder) is not None:
-                add_responder.sendNumber(numberRequest.value)
-                return add_responder.response()
+                return add_responder.sendNumber(numberRequest.value)
             else:
                 return None
         else:
