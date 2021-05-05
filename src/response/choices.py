@@ -1,30 +1,35 @@
 from enum import Enum, auto
 from typing import List, Optional, Type
 
-from ..item_property import ItemType
+from . import Response
 
 
-class AddItemTypeResponse:
+class AddZoneNumberResponse(Response):
+    def response_string(self) -> str:
+        return "ゾーン番号はいくつですか？数値を入力してください"
+
+
+class AddItemTypeResponse(Response):
     def response_string(self) -> str:
         items_string: List[str] = [
-            f"{item.value: >2}: {item.itemName}" for item in list(ItemType)
+            f"{item.value: >2}: {item.itemName}" for item in list(AddItemTypeChoice)
         ]
         combined_string: str = "\n".join(items_string)
         with_code_block = f"```\n{combined_string}\n```"
         return f"どのアイテムを保管しますか？数値を入力してください\n{with_code_block}"
 
 
-class AddItemCountResponse:
+class AddItemCountResponse(Response):
     def response_string(self) -> str:
         return "何個入りですか？数値を入力してください"
 
 
-class AddInAdditionResponse:
+class AddInAdditionResponse(Response):
     def response_string(self) -> str:
         return "アイテム追加中です"
 
 
-class AddEditResponse:
+class AddEditResponse(Response):
     def response_string(self) -> str:
         items_string: List[str] = [
             f"{item.value}: {item.itemName}" for item in list(AddEditChoice)
@@ -32,6 +37,22 @@ class AddEditResponse:
         combined_string: str = "\n".join(items_string)
         with_code_block = f"```\n{combined_string}\n```"
         return f"何を編集しますか？数値を入力してください\n{with_code_block}"
+
+
+class AddContainerTypeResponse(Response):
+    def response_string(self) -> str:
+        items_string: List[str] = [
+            f"{item.value: >2}: {item.itemName}"
+            for item in list(AddContainerTypeChoice)
+        ]
+        combined_string: str = "\n".join(items_string)
+        with_code_block = f"```\n{combined_string}\n```"
+        return f"入れ物のタイプを数値を入力してください\n{with_code_block}"
+
+
+class AddContainerNumberResponse(Response):
+    def response_string(self) -> str:
+        return f"入れ物の番号はいくつですか？数値で入力してください（直置きのときもなんか入力しといて）"
 
 
 class AddState(Enum):
@@ -50,11 +71,11 @@ class AddState(Enum):
         elif self == AddState.edit:
             return AddEditResponse().response_string()
         elif self == AddState.zone_number:
-            raise Exception()
+            return AddZoneNumberResponse().response_string()
         elif self == AddState.container_type:
-            raise Exception()
+            return AddContainerTypeResponse().response_string()
         elif self == AddState.container_number:
-            raise Exception()
+            return AddContainerNumberResponse().response_string()
         else:
             raise Exception()
 
@@ -92,13 +113,30 @@ class AddItemTypeChoice(Choice, Enum):
             return "Tool Refill Pack"
         elif self == AddItemTypeChoice.disinfection:
             return "Disinfection Pack"
+        elif self == AddItemTypeChoice.fog_repeller:
+            return "Fog Repeller"
+        elif self == AddItemTypeChoice.long_range_flashlight:
+            return "Long Range Flashlight"
+        elif self == AddItemTypeChoice.c_form_granade:
+            return "C-form Granade"
+        elif self == AddItemTypeChoice.lock_melter:
+            return "Lock Melter"
+        elif self == AddItemTypeChoice.glow_stick:
+            return "Glow Stick"
+        elif self == AddItemTypeChoice.l2_lp_syringe:
+            return "L2 LP Syringe"
+        elif self == AddItemTypeChoice.iix_syringe:
+            return "IIX Syringe"
+        elif self == AddItemTypeChoice.explosive_tripmine:
+            return "Explosive Tripmine"
+        elif self == AddItemTypeChoice.c_form_tripmine:
+            return "C-form Tripmine"
         else:
             raise Exception()
-        raise Exception()
 
 
 class AddEditChoice(Choice, Enum):
-    cancel = 0
+    complete = 0
     zone = 1
     container = 2
     item_count = 3
@@ -106,8 +144,8 @@ class AddEditChoice(Choice, Enum):
     # 外向けの名前、もっといい命名がほしい
     @property
     def itemName(self) -> str:
-        if self == AddEditChoice.cancel:
-            return "キャンセル"
+        if self == AddEditChoice.complete:
+            return "終了"
         elif self == AddEditChoice.zone:
             return "ゾーン"
         elif self == AddEditChoice.container:
@@ -118,7 +156,7 @@ class AddEditChoice(Choice, Enum):
             raise Exception()
 
     def next_state(self) -> Optional[AddState]:
-        if self == AddEditChoice.cancel:
+        if self == AddEditChoice.complete:
             # Noneじゃなくて平常時も状態として管理しない？
             return None
         elif self == AddEditChoice.zone:
@@ -131,19 +169,19 @@ class AddEditChoice(Choice, Enum):
             raise Exception()
 
 
-class AddContainterTypeChoice(Choice, Enum):
+class AddContainerTypeChoice(Choice, Enum):
     box = auto()
     locker = auto()
     others = auto()
 
     @property
     def itemName(self) -> str:
-        if self == AddContainterTypeChoice.box:
+        if self == AddContainerTypeChoice.box:
             return "ボックス"
-        elif self == AddContainterTypeChoice.locker:
+        elif self == AddContainerTypeChoice.locker:
             return "ロッカー"
-        elif self == AddContainterTypeChoice.others:
-            return "その他"
+        elif self == AddContainerTypeChoice.others:
+            return "直置き"
         else:
             raise Exception()
 
@@ -159,7 +197,7 @@ def from_state_to_choice(state: AddState) -> Optional[Type[Choice]]:
     elif AddState.zone_number:
         return None
     elif AddState.container_type:
-        return AddContainterTypeChoice
+        return AddContainerTypeChoice
     elif AddState.container_number:
         return None
     else:

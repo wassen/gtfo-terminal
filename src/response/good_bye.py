@@ -1,8 +1,7 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
+from . import Response
 
 
-class GoodByeResponse:
+class GoodByeResponse(Response):
     # should_close: bool = True
 
     def response_string(self) -> str:

@@ -7,8 +7,10 @@ from typing import cast
 from src.extension import unwrap
 from src.gtfo_terminal import Responder, clear_add_responder
 from src.request import CommandRequest, NumberRequest, Request
-from src.response.choices import (AddEditResponse, AddInAdditionResponse,
-                                  AddItemCountResponse, AddItemTypeResponse)
+from src.response.choices import (AddContainerNumberResponse,
+                                  AddContainerTypeResponse, AddEditResponse,
+                                  AddInAdditionResponse, AddItemCountResponse,
+                                  AddItemTypeResponse, AddZoneNumberResponse)
 from src.response.good_bye import GoodByeResponse
 
 
@@ -38,6 +40,7 @@ class TestSendAdd(unittest.TestCase):
 
         response = unwrap(responder.send_request(CommandRequest.add))
 
+        # 何を追加しますか？
         self.assertEqual(
             response,
             AddItemTypeResponse().response_string(),
@@ -45,6 +48,7 @@ class TestSendAdd(unittest.TestCase):
 
         response = unwrap(responder.send_request(CommandRequest.add))
 
+        # 追加中にaddしないで
         self.assertEqual(
             response,
             AddInAdditionResponse().response_string(),
@@ -52,15 +56,59 @@ class TestSendAdd(unittest.TestCase):
 
         response = unwrap(responder.send_request(NumberRequest(1)))
 
-        self.assertEqual(response, AddItemCountResponse().response_string())
+        # アイテムの数は？
+        self.assertEqual(
+            response,
+            AddItemCountResponse().response_string(),
+        )
 
         response = unwrap(responder.send_request(NumberRequest(1)))
 
-        self.assertEqual(response, AddEditResponse().response_string())
+        # 何編集する？
+        self.assertEqual(
+            response,
+            AddEditResponse().response_string(),
+        )
 
         response = unwrap(responder.send_request(NumberRequest(1)))
 
-        self.assertEqual(response, AddZoneNumberResponse().response_string())
+        # ゾーン番号は？
+        self.assertEqual(
+            response,
+            AddZoneNumberResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(1)))
+
+        # 何編集する？
+        self.assertEqual(
+            response,
+            AddEditResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(2)))
+
+        # 入れ物タイプは？
+        self.assertEqual(
+            response,
+            AddContainerTypeResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(1)))
+
+        # 入れ物番号は？
+        self.assertEqual(
+            response,
+            AddContainerNumberResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(1)))
+
+        # 何編集する？
+        self.assertEqual(
+            response,
+            AddEditResponse().response_string(),
+        )
 
 
 if __name__ == "__main__":

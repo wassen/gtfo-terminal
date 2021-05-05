@@ -9,10 +9,13 @@ import discord
 from . import state
 from .environment import Env
 from .item.item import Item
-from .item_property import ItemType
 from .request import CommandRequest, NumberRequest, Request
-from .response.choices import (AddEditChoice, AddEditResponse,
-                               AddInAdditionResponse, AddItemCountResponse,
+from .response import Response
+from .response.choices import (AddContainerNumberResponse,
+                               AddContainerTypeChoice,
+                               AddContainerTypeResponse, AddEditChoice,
+                               AddEditResponse, AddInAdditionResponse,
+                               AddItemCountResponse, AddItemTypeChoice,
                                AddItemTypeResponse, AddState)
 from .response.good_bye import GoodByeResponse
 
@@ -74,86 +77,87 @@ class Delete(Command):
         self.__parse(elements[1:])
 
 
-class AddOld(Command):
-    def output(self) -> Optional[str]:
-        return self.message
-
-    def __element_type(self, element: str) -> Optional[str]:
-        # TODO: 別表記をクラスで表現したい
-        resources: List[str] = ["ammo", "medi", "tool"]
-        consumables: List[str] = ["fog", "c-form", "melter", "mine"]
-
-        if any([element.startswith(item) for item in resources]):
-            return "item"
-        elif any([element.startswith(item) for item in consumables]):
-            return "item"
-        elif element.startswith("locker") or element.startswith("box"):
-            return "container"
-        elif element.startswith("zone"):
-            return "zone"
-        else:
-            return None
-
-    def __parse(self, elements: List[str]) -> None:
-        if len(elements) == 0:
-            self.message = "ex) add medi_4 locker_0 zone_1 \n 入力可能文字は, ammo, medi, tool, fog, c-form, melter, mineです"
-            return
-
-        storingItems: Dict[Optional[str], List[str]] = {
-            self.__element_type(element): element.split("_") for element in elements
-        }
-        storingItemsFilterNotNull = {
-            key: value for key, value in storingItems.items() if key is not None
-        }
-
-        global store, store_index
-        store[store_index] = storingItemsFilterNotNull
-
-        self.message = (
-            f"index: {store_index}, value{storingItemsFilterNotNull.__str__()}"
-        )
-        store_index += 1
-
-    def __init__(self, elements: List[str]) -> None:
-        self.message = "???"
-        self.__parse(elements[1:])
+# from .item_property import ItemType
+# class AddOld(Command):
+#     def output(self) -> Optional[str]:
+#         return self.message
+#
+#     def __element_type(self, element: str) -> Optional[str]:
+#         # TODO: 別表記をクラスで表現したい
+#         resources: List[str] = ["ammo", "medi", "tool"]
+#         consumables: List[str] = ["fog", "c-form", "melter", "mine"]
+#
+#         if any([element.startswith(item) for item in resources]):
+#             return "item"
+#         elif any([element.startswith(item) for item in consumables]):
+#             return "item"
+#         elif element.startswith("locker") or element.startswith("box"):
+#             return "container"
+#         elif element.startswith("zone"):
+#             return "zone"
+#         else:
+#             return None
+#
+#     def __parse(self, elements: List[str]) -> None:
+#         if len(elements) == 0:
+#             self.message = "ex) add medi_4 locker_0 zone_1 \n 入力可能文字は, ammo, medi, tool, fog, c-form, melter, mineです"
+#             return
+#
+#         storingItems: Dict[Optional[str], List[str]] = {
+#             self.__element_type(element): element.split("_") for element in elements
+#         }
+#         storingItemsFilterNotNull = {
+#             key: value for key, value in storingItems.items() if key is not None
+#         }
+#
+#         global store, store_index
+#         store[store_index] = storingItemsFilterNotNull
+#
+#         self.message = (
+#             f"index: {store_index}, value{storingItemsFilterNotNull.__str__()}"
+#         )
+#         store_index += 1
+#
+#     def __init__(self, elements: List[str]) -> None:
+#         self.message = "???"
+#         self.__parse(elements[1:])
 
 
 # addの引数ゼロならこっちにする、のほうが良いか
 # 1とかのコマンドも含むから、すでにaddコマンドではないんだよなこれ
-class AddInteractive(Command):
-    def output(self) -> Optional[str]:
-        return self.message
-
-    def add_item(self, number: int) -> None:
-        if number in (item_type.value for item_type in ItemType):
-            self.message = "つぎー"
-        else:
-            self.message = "ないです"
-
-    def interpret_number(self, number: int) -> None:
-        if state.add_state == state.AddState.item:
-            self.add_item(number)
-        elif state.add_state == state.AddState.zone:
-            pass
-        elif state.add_state == state.AddState.container:
-            pass
-        elif state.add_state is None:
-            pass
-
-    def __init__(self, elements: List[str]) -> None:
-        if elements[0] == "add":
-            state.add_state = state.AddState.item
-            items_string: List[str] = [
-                f"{item.value: >2}: {item.itemName}" for item in list(ItemType)
-            ]
-            combined_string: str = "\n".join(items_string)
-            with_code_block = f"```\n{combined_string}\n```"
-            self.message = f"どのアイテムを保管しますか？数値を入力してください\n{with_code_block}"
-        elif isinstance(number := int(elements[0]), int):
-            self.interpret_number(number)
-        else:
-            pass
+# class AddInteractive(Command):
+#     def output(self) -> Optional[str]:
+#         return self.message
+#
+#     def add_item(self, number: int) -> None:
+#         if number in (item_type.value for item_type in ItemType):
+#             self.message = "つぎー"
+#         else:
+#             self.message = "ないです"
+#
+#     def interpret_number(self, number: int) -> None:
+#         if state.add_state == state.AddState.item:
+#             self.add_item(number)
+#         elif state.add_state == state.AddState.zone:
+#             pass
+#         elif state.add_state == state.AddState.container:
+#             pass
+#         elif state.add_state is None:
+#             pass
+#
+#     def __init__(self, elements: List[str]) -> None:
+#         if elements[0] == "add":
+#             state.add_state = state.AddState.item
+#             items_string: List[str] = [
+#                 f"{item.value: >2}: {item.itemName}" for item in list(ItemType)
+#             ]
+#             combined_string: str = "\n".join(items_string)
+#             with_code_block = f"```\n{combined_string}\n```"
+#             self.message = f"どのアイテムを保管しますか？数値を入力してください\n{with_code_block}"
+#         elif isinstance(number := int(elements[0]), int):
+#             self.interpret_number(number)
+#         else:
+#             pass
 
 
 class Cancel(Command):
@@ -183,9 +187,11 @@ def parse_command(message_content: str) -> Command:
     if "help".startswith(command):
         return Help()
     elif "add".startswith(command):
-        return AddInteractive(elements)
+        raise Exception()
+        # return AddInteractive(elements)
     elif command == "add":
-        return AddOld(elements)
+        raise Exception()
+        # return AddOld(elements)
     elif "list".startswith(command):
         return ListCommand(elements)
     elif "delete".startswith(command):
@@ -287,7 +293,7 @@ class AddResponder:
 
     def sendNumber(self, number: int) -> Optional[str]:
         if self.current_state == AddState.item_type:
-            self.item.item_type = ItemType(number)
+            self.item.item_type = AddItemTypeChoice(number)
             self.current_state = AddState.item_count
             return AddItemCountResponse().response_string()
         elif self.current_state == AddState.item_count:
@@ -295,11 +301,23 @@ class AddResponder:
             self.current_state = AddState.edit
             return AddEditResponse().response_string()
         elif self.current_state == AddState.edit:
-            if (next_state := AddEditChoice(number).next_state()) is not None:
+            if (next_state := AddEditChoice(number).next_state()) is None:
+                return "ぬぬ"
+            else:
                 self.current_state = next_state
                 return next_state.response()
-            else:
-                return "nu"
+        elif self.current_state == AddState.zone_number:
+            self.item.zone_number = number
+            self.current_state = AddState.edit
+            return AddEditResponse().response_string()
+        elif self.current_state == AddState.container_type:
+            self.item.container_type = AddContainerTypeChoice(number)
+            self.current_state = AddState.container_number
+            return AddContainerNumberResponse().response_string()
+        elif self.current_state == AddState.container_number:
+            self.item.container_number = number
+            self.current_state = AddState.edit
+            return AddEditResponse().response_string()
         else:
             return None
 
