@@ -12,3 +12,7 @@ class Item:
     zone_number: Optional[int]
     container_type: Optional[AddContainerTypeChoice]
     container_number: Optional[int]
+
+    # いい感じに前列をフォーマットさせたい
+    def __str__(self) -> str:
+        return f"|{self.item_type.itemName}: |||"

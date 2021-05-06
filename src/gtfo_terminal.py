@@ -18,9 +18,7 @@ from .response.choices import (AddContainerNumberResponse,
                                AddItemCountResponse, AddItemTypeChoice,
                                AddItemTypeResponse, AddResponse, AddState)
 from .response.good_bye import GoodByeResponse
-
-store_index: int = 0
-store: Dict[int, Dict[str, List[str]]] = {}
+from .store.memory_store import MemoryStore as Store
 
 
 def read_help() -> str:
@@ -34,6 +32,8 @@ class Command:
 
 
 class ListCommand(Command):
+    message: str
+
     # output じゃなくてmessage見ればいいのでは
     def output(self) -> Optional[str]:
         if len(self.message) == 0:
@@ -43,7 +43,8 @@ class ListCommand(Command):
 
     def __parse(self, elements: List[str]) -> None:
         formatted_output_line = [
-            f"index: {key}, value: {value.__str__()}" for key, value in store.items()
+            f"index: {key}, value: {value.__str__()}"
+            for (key, value) in Store().findAll().items()
         ]
         self.message = "\n".join(formatted_output_line)
 
@@ -63,14 +64,14 @@ class Delete(Command):
 
         index = elements[0]
 
-        global store
+        # global store
 
-        deletedItem = store.pop(int(index), None)
+        # deletedItem = store.pop(int(index), None)
 
-        if deletedItem is None:
-            self.message = f"indexが{index}なアイテムはないです"
-        else:
-            self.message = f"以下のアイテムを削除しました{deletedItem}"
+        # if deletedItem is None:
+        #     self.message = f"indexが{index}なアイテムはないです"
+        # else:
+        #     self.message = f"以下のアイテムを削除しました{deletedItem}"
 
     def __init__(self, elements: List[str]) -> None:
         self.message = "???"
@@ -353,6 +354,7 @@ class Responder:
                 return None
 
             if (response := add_responder.sendNumber(numberRequest.value)) is not None:
+                # ネスト深すぎ
                 if response.complete:
                     add_responder = None
 
