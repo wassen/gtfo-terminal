@@ -15,4 +15,4 @@ class Item:
 
     # いい感じに前列をフォーマットさせたい
     def __str__(self) -> str:
-        return f"|{self.item_type.itemName}: |||"
+        return f"|{self.item_type.itemName}: {self.item_count}|zone: {self.zone_number}|{self.container_type.itemName}: {self.container_number}|"

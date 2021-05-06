@@ -8,7 +8,8 @@ from src.extension import unwrap
 from src.gtfo_terminal import Responder, clear_add_responder
 from src.request import CommandRequest, NumberRequest, Request
 from src.response import Response
-from src.response.choices import (AddContainerNumberResponse,
+from src.response.choices import (AddCompleteResponse,
+                                  AddContainerNumberResponse,
                                   AddContainerTypeResponse, AddEditResponse,
                                   AddInAdditionResponse, AddItemCountResponse,
                                   AddItemTypeResponse, AddZoneNumberResponse)
@@ -109,6 +110,14 @@ class TestSendAdd(unittest.TestCase):
         self.assertEqual(
             response.response_string(),
             AddEditResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(0)))
+
+        # 完了しました
+        self.assertEqual(
+            response.response_string(),
+            AddCompleteResponse().response_string(),
         )
 
 

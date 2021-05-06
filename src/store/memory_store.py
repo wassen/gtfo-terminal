@@ -4,17 +4,16 @@ from ..item.item import Item
 from . import Store
 
 
-class __Column(NamedTuple):
+class _Column(NamedTuple):
     item: Item
     logical_deleted: bool = False
 
 
-__index: int = 0
-__store: Dict[
+_index: int = 0
+_store: Dict[
     int,
-    __Column,
-]
-
+    _Column,
+] = {}
 
 # スレッドセーフじゃない、というか複数インスタンス不可なので、インスタンスごとに保存できるか？
 # store に名前つけられるようにするか
@@ -22,34 +21,34 @@ class MemoryStore(Store):
     def clear(
         self,
     ) -> None:
-        global __index, __store
+        global _index, _store
 
-        __index = 0
-        __store = {}
+        _index = 0
+        _store = {}
 
     def add(
         self,
         item: Item,
     ) -> int:
-        global __index, __store
+        global _index, _store
 
-        current_index = __index
-        __index = current_index + 1
-        __store[current_index] = __Column(item)
+        current_index = _index
+        _index = current_index + 1
+        _store[current_index] = _Column(item)
         return current_index
 
     def restore(
         self,
         index: int,
     ) -> Optional[Item]:
-        global __store
+        global _store
 
-        targetColumn = __store.pop(index, None)
+        targetColumn = _store.pop(index, None)
 
         if (targetColumn := targetColumn) is None:
             return None
 
-        __store[index] = __Column(
+        _store[index] = _Column(
             item=targetColumn.item,
             logical_deleted=False,
         )
@@ -60,14 +59,14 @@ class MemoryStore(Store):
         self,
         index: int,
     ) -> Optional[Item]:
-        global __store
+        global _store
 
-        deletedColumn = __store.pop(index, None)
+        deletedColumn = _store.pop(index, None)
 
         if (deletedColumn := deletedColumn) is None:
             return None
 
-        __store[index] = __Column(
+        _store[index] = _Column(
             item=deletedColumn.item,
             logical_deleted=True,
         )
@@ -79,9 +78,9 @@ class MemoryStore(Store):
         index: int,
         item: Item,
     ) -> None:
-        global __store
+        global _store
 
-        __store[index] = __Column(
+        _store[index] = _Column(
             item=item,
             logical_deleted=False,
         )

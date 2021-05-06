@@ -334,6 +334,9 @@ def clear_add_responder() -> None:
     add_responder = None
 
 
+# ResponderがStoreにアクセスするのはどうなんだ？と思いつつも、ユーザーのRequestを解釈するのがResponderで、
+# つまりItemを作れるのはResponderだけ
+# Responderが解釈してActionを作り、Actionを返し、ActionにItemを内包させる、とかだろうか
 class Responder:
     def send_request(self, request: Request) -> Optional[Response]:
         global add_responder
@@ -356,6 +359,8 @@ class Responder:
             if (response := add_responder.sendNumber(numberRequest.value)) is not None:
                 # ネスト深すぎ
                 if response.complete:
+                    item = add_responder.item
+                    Store().add(item)
                     add_responder = None
 
                 return response
