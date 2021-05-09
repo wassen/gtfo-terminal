@@ -6,14 +6,18 @@ from typing import cast
 
 from src.extension import unwrap
 from src.gtfo_terminal import Responder, clear_add_responder
+from src.item.item import Item
 from src.request import CommandRequest, NumberRequest, Request
 from src.response import Response
 from src.response.choices import (AddCompleteResponse,
                                   AddContainerNumberResponse,
+                                  AddContainerTypeChoice,
                                   AddContainerTypeResponse, AddEditResponse,
                                   AddInAdditionResponse, AddItemCountResponse,
-                                  AddItemTypeResponse, AddZoneNumberResponse)
+                                  AddItemTypeChoice, AddItemTypeResponse,
+                                  AddZoneNumberResponse)
 from src.response.good_bye import GoodByeResponse
+from src.response.list import ListResponse
 
 
 class TestSendBye(unittest.TestCase):
@@ -27,6 +31,61 @@ class TestSendBye(unittest.TestCase):
         self.assertEqual(
             response.response_string(),
             GoodByeResponse().response_string(),
+        )
+
+
+class TestSendList(unittest.TestCase):
+    def item1(self) -> Item:
+        # builderをItemに作りたい
+        item = Item()
+        item.item_type = AddItemTypeChoice.ammo
+        item.item_count = 1
+        item.zone_number = 335
+        item.container_type = AddContainerTypeChoice.box
+        item.container_number = 1
+        return item
+
+    def item2(self) -> Item:
+        # builderをItemに作りたい
+        item = Item()
+        item.item_type = AddItemTypeChoice.l2_lp_syringe
+        item.item_count = 1111
+        item.zone_number = 5
+        item.container_type = AddContainerTypeChoice.locker
+        item.container_number = 3455
+        return item
+
+    def test_format(self) -> None:
+        items = {
+            0: self.item1(),
+            1: self.item2(),
+        }
+
+        self.assertEqual(
+            ListResponse("message").format(items),
+            "\n".join(
+                [
+                    "x|          |         |          |",
+                    "0|Ammo:    1|zone: 335| box:    1|",
+                    "1|L2LP: 1111|zone:   5|lock: 3455|",
+                ]
+            ),
+        )
+
+    def test_short_name_lon(self) -> None:
+        self.assertTrue(
+            all([len(item.short_name) == 4 for item in AddItemTypeChoice]),
+        )
+
+    def test_only_list(self) -> None:
+        responder = Responder()
+
+        response = unwrap(responder.send_request(CommandRequest.list))
+
+        # 何を追加しますか？
+        self.assertEqual(
+            response.response_string(),
+            "No items",  # 重複定義
         )
 
 
@@ -118,6 +177,13 @@ class TestSendAdd(unittest.TestCase):
         self.assertEqual(
             response.response_string(),
             AddCompleteResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(CommandRequest.list))
+
+        self.assertEqual(
+            response.response_string(),
+            ListResponse(message="").response_string(),
         )
 
 

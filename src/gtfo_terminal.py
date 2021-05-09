@@ -18,6 +18,7 @@ from .response.choices import (AddContainerNumberResponse,
                                AddItemCountResponse, AddItemTypeChoice,
                                AddItemTypeResponse, AddResponse, AddState)
 from .response.good_bye import GoodByeResponse
+from .response.list import ListResponse
 from .store.memory_store import MemoryStore as Store
 
 
@@ -350,6 +351,8 @@ class Responder:
                 return add_responder.firstResponse()
             else:
                 return AddInAdditionResponse()
+        elif request == CommandRequest.list:
+            return ListResponse(message=ListCommand([""]).output())
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
 

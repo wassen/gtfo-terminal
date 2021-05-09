@@ -119,6 +119,37 @@ class AddItemTypeChoice(Choice, Enum):
     c_form_tripmine = 13
 
     @property
+    def short_name(self) -> str:
+        if self == AddItemTypeChoice.ammo:
+            return "Ammo"
+        elif self == AddItemTypeChoice.medi:
+            return "Medi"
+        elif self == AddItemTypeChoice.tool:
+            return "Tool"
+        elif self == AddItemTypeChoice.disinfection:
+            return "DInf"
+        elif self == AddItemTypeChoice.fog_repeller:
+            return "Repl"
+        elif self == AddItemTypeChoice.long_range_flashlight:
+            return "FLSH"
+        elif self == AddItemTypeChoice.c_form_granade:
+            return "CGra"
+        elif self == AddItemTypeChoice.lock_melter:
+            return "Melt"
+        elif self == AddItemTypeChoice.glow_stick:
+            return "Glow"
+        elif self == AddItemTypeChoice.l2_lp_syringe:
+            return "L2LP"
+        elif self == AddItemTypeChoice.iix_syringe:
+            return "II X"
+        elif self == AddItemTypeChoice.explosive_tripmine:
+            return "EMin"
+        elif self == AddItemTypeChoice.c_form_tripmine:
+            return "CMin"
+        else:
+            raise Exception()
+
+    @property
     def itemName(self) -> str:
         if self == AddItemTypeChoice.ammo:
             return "Ammunition Pack"
@@ -197,6 +228,17 @@ class AddContainerTypeChoice(Choice, Enum):
             return "ロッカー"
         elif self == AddContainerTypeChoice.others:
             return "直置き"
+        else:
+            raise Exception()
+
+    @property
+    def short_name(self) -> str:
+        if self == AddContainerTypeChoice.box:
+            return "box"
+        elif self == AddContainerTypeChoice.locker:
+            return "lock"
+        elif self == AddContainerTypeChoice.others:
+            return "none"
         else:
             raise Exception()
 

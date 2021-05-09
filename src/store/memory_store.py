@@ -88,4 +88,4 @@ class MemoryStore(Store):
     def findAll(
         self,
     ) -> Dict[int, Item]:
-        return {}
+        return {key: value.item for key, value in _store.items()}

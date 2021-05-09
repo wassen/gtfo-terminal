@@ -10,12 +10,24 @@ from typing import Optional
 class Request:
     @classmethod
     def fromContent(cls, messageContent: str) -> Optional[Request]:
-        byeCommand = ["bye", "quit", "close", "disconnect"]
-        addCommand = ["add"]
+        byeCommand = [
+            "bye",
+            "quit",
+            "close",
+            "disconnect",
+        ]
+        addCommand = [
+            "add",
+        ]
+        addCommand = [
+            "list",
+        ]
 
         if messageContent in byeCommand:
             return CommandRequest.bye
         elif messageContent in addCommand:
+            return CommandRequest.add
+        elif messageContent in listCommand:
             return CommandRequest.add
         elif isinstance(number := int(messageContent), int):
             return NumberRequest(number)
@@ -33,3 +45,4 @@ class NumberRequest(Request):
 class CommandRequest(Request, Enum):
     bye = auto()
     add = auto()
+    list = auto()
