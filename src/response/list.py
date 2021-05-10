@@ -20,6 +20,12 @@ class ListResponse(Response):
     def __spaces(self, count: int) -> str:
         return " " * count
 
+    def __index_length(
+        self,
+        indexes: List[int],
+    ) -> int:
+        return max([len(str(index)) for index in indexes])
+
     # 返り値が良くない、というか加算した長さ返す必要ある？
     # 渡すものも大きすぎるか？
     def __item_length(
@@ -99,6 +105,19 @@ class ListResponse(Response):
                 max_container_type_length + 2 + max_container_number_length,
             )
 
+    def __first_index_string(self, max_index_length: int) -> str:
+        if max_index_length == 0:
+            return ""
+        elif max_index_length == 1:
+            return "x"
+        elif 1 < max_index_length:
+            return f"{self.__spaces(max_index_length - 2)}id"
+        else:
+            raise ValueError()
+
+    def __index_string(self, index: int, max_index_length: int) -> str:
+        return f"{index:0{max_index_length}d}"
+
     def __item_type_string(self, value: Item, max_item_type_length: int) -> str:
         return f"{self.__spaces(max_item_type_length - len(value.item_type.short_name))}{value.item_type.short_name}: "
 
@@ -126,6 +145,8 @@ class ListResponse(Response):
         if len(items.items()) == 0:
             return "No items"
 
+        index_length = self.__index_length([key for key, value in items.items()])
+
         (max_item_type_length, max_item_count_length, item_length) = self.__item_length(
             items
         )
@@ -141,11 +162,11 @@ class ListResponse(Response):
         return "\n".join(
             ["```"]
             + [
-                f"x|{self.__spaces(item_length)}|{self.__spaces(zone_length)}|{self.__spaces(container_length)}|"
+                f"{self.__first_index_string(index_length)}|{self.__spaces(item_length)}|{self.__spaces(zone_length)}|{self.__spaces(container_length)}|"
             ]
             + [
                 (
-                    f"{key}|"
+                    f"{self.__index_string(key, index_length)}|"
                     f"{self.__item_type_string(value, max_item_type_length)}"
                     f"{self.__item_count_string(value, max_item_count_length)}|"
                     f"{self.__zone_string(value, max_zone_number_length) if value.zone_number is not None else self.__spaces(zone_length)}|"

@@ -66,6 +66,14 @@ class TestSendList(unittest.TestCase):
         items = {
             1: self.item1(),
             2: self.item2(),
+            3: self.item2(),
+            4: self.item2(),
+            5: self.item2(),
+            6: self.item2(),
+            7: self.item2(),
+            8: self.item2(),
+            9: self.item2(),
+            10: self.item2(),
         }
 
         self.assertEqual(
@@ -73,9 +81,17 @@ class TestSendList(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "x|          |         |          |",
-                    "1|Ammo:    1|zone: 335| box:    1|",
-                    "2|L2LP: 1111|zone:   5|lock: 3455|",
+                    "id|          |         |          |",
+                    "01|Ammo:    1|zone: 335| box:    1|",
+                    "02|L2LP: 1111|zone:   5|lock: 3455|",
+                    "03|L2LP: 1111|zone:   5|lock: 3455|",
+                    "04|L2LP: 1111|zone:   5|lock: 3455|",
+                    "05|L2LP: 1111|zone:   5|lock: 3455|",
+                    "06|L2LP: 1111|zone:   5|lock: 3455|",
+                    "07|L2LP: 1111|zone:   5|lock: 3455|",
+                    "08|L2LP: 1111|zone:   5|lock: 3455|",
+                    "09|L2LP: 1111|zone:   5|lock: 3455|",
+                    "10|L2LP: 1111|zone:   5|lock: 3455|",
                     "```",
                 ]
             ),
