@@ -52,6 +52,7 @@ class TestSendList(unittest.TestCase):
         item.zone_number = 335
         item.container_type = AddContainerTypeChoice.box
         item.container_number = 1
+        item.author_name = "short"
         return item
 
     def item2(self) -> Item:
@@ -83,8 +84,9 @@ class TestSendList(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "id|          |         |          |      |",
-                    "01|Ammo:    1|zone: 335| box:    1|nobody|",
+                    "id|   item   |   zone  |container |author|",
+                    "------------------------------------------",
+                    "01|Ammo:    1|zone: 335| box:    1| short|",
                     "02|L2LP: 1111|zone:   5|lock: 3455|nobody|",
                     "03|L2LP: 1111|zone:   5|lock: 3455|nobody|",
                     "04|L2LP: 1111|zone:   5|lock: 3455|nobody|",
@@ -170,7 +172,8 @@ class TestSendAdd(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "x|       |||      |",
+                    "x|  item |||author|",
+                    "-------------------",
                     "1|Ammo: 1|||nobody|",
                     "```",
                 ]
@@ -264,7 +267,8 @@ class TestSendAdd(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "x|       |       |      |      |",
+                    "x|  item |  zone |contai|author|",
+                    "--------------------------------",
                     "1|Ammo: 1|       |      |nobody|",
                     "2|Ammo: 1|zone: 1|box: 1|nobody|",
                     "```",

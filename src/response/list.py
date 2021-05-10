@@ -117,9 +117,60 @@ class ListResponse(Response):
         elif max_index_length == 1:
             return "x"
         elif 1 < max_index_length:
-            return f"{self.__spaces(max_index_length - 2)}id"
+            return f"id".center(
+                max_index_length,
+                " ",
+            )
         else:
             raise ValueError()
+
+    def __first_item_string(
+        self,
+        max_item_length: int,
+    ) -> str:
+        if max_item_length <= 4:
+            return "item"[:max_item_length]
+        else:
+            return "item".center(
+                max_item_length,
+                " ",
+            )
+
+    def __first_zone_string(
+        self,
+        max_zone_length: int,
+    ) -> str:
+        if max_zone_length <= 4:
+            return "zone"[:max_zone_length]
+        else:
+            return "zone".center(
+                max_zone_length,
+                " ",
+            )
+
+    def __first_container_string(
+        self,
+        max_container_length: int,
+    ) -> str:
+        if max_container_length <= 9:
+            return "container"[:max_container_length]
+        else:
+            return "container".center(
+                max_container_length,
+                " ",
+            )
+
+    def __first_author_string(
+        self,
+        max_author_length: int,
+    ) -> str:
+        if max_author_length <= 6:
+            return "author"[:max_author_length]
+        else:
+            return "author".center(
+                max_author_length,
+                " ",
+            )
 
     def __index_string(self, index: int, max_index_length: int) -> str:
         return f"{index:0{max_index_length}d}"
@@ -184,7 +235,10 @@ class ListResponse(Response):
         return "\n".join(
             ["```"]
             + [
-                f"{self.__first_index_string(index_length)}|{self.__spaces(item_length)}|{self.__spaces(zone_length)}|{self.__spaces(container_length)}|{self.__spaces(max_author_name_length)}|"
+                f"{self.__first_index_string(index_length)}|{self.__first_item_string(item_length)}|{self.__first_zone_string(zone_length)}|{self.__first_container_string(container_length)}|{self.__first_author_string(max_author_name_length)}|"
+            ]
+            + [
+                f"{'-' * (1 + index_length + 1 + item_length + 1 + zone_length + 1 + container_length + 1 + max_author_name_length)}"
             ]
             + [
                 (
