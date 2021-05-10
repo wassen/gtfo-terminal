@@ -343,7 +343,9 @@ def clear_add_responder() -> None:
 # つまりItemを作れるのはResponderだけ
 # Responderが解釈してActionを作り、Actionを返し、ActionにItemを内包させる、とかだろうか
 class Responder:
-    def send_request(self, request: Request) -> Optional[Response]:
+    def send_request(
+        self, request: Request, member_name: str = "nobody"
+    ) -> Optional[Response]:
         global add_responder
 
         if request == CommandRequest.bye:
@@ -367,6 +369,7 @@ class Responder:
                 # ネスト深すぎ
                 if response.complete:
                     item = add_responder.item
+                    item.author_name = member_name
                     Store().add(item)
                     add_responder = None
 

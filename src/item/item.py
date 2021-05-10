@@ -12,6 +12,7 @@ class Item:
     zone_number: Optional[int] = None
     container_type: Optional[AddContainerTypeChoice] = None
     container_number: Optional[int] = None
+    author_name: str = "nobody"
 
     # class Builder:
     #     item_type: Optional[AddItemTypeChoice]

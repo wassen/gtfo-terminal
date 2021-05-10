@@ -105,6 +105,12 @@ class ListResponse(Response):
                 max_container_type_length + 2 + max_container_number_length,
             )
 
+    def __author_name_length(self, author_names: List[str]) -> int:
+        if len(author_names) == 0:
+            return 0
+
+        return max([len(author_name) for author_name in author_names])
+
     def __first_index_string(self, max_index_length: int) -> str:
         if max_index_length == 0:
             return ""
@@ -138,6 +144,14 @@ class ListResponse(Response):
     ) -> str:
         return f"{value.container_number:{max_container_number_length}d}"
 
+    def __author_name_string(
+        self, author_name: str, max_author_name_length: int
+    ) -> str:
+        return author_name.rjust(
+            max_author_name_length,
+            " ",
+        )
+
     def format(
         self,
         items: Dict[int, Item],
@@ -159,10 +173,18 @@ class ListResponse(Response):
             container_length,
         ) = self.__container_length(items)
 
+        max_author_name_length = self.__author_name_length(
+            [
+                value.author_name
+                for key, value in items.items()
+                if value.author_name is not None
+            ]
+        )
+
         return "\n".join(
             ["```"]
             + [
-                f"{self.__first_index_string(index_length)}|{self.__spaces(item_length)}|{self.__spaces(zone_length)}|{self.__spaces(container_length)}|"
+                f"{self.__first_index_string(index_length)}|{self.__spaces(item_length)}|{self.__spaces(zone_length)}|{self.__spaces(container_length)}|{self.__spaces(max_author_name_length)}|"
             ]
             + [
                 (
@@ -172,6 +194,7 @@ class ListResponse(Response):
                     f"{self.__zone_string(value, max_zone_number_length) if value.zone_number is not None else self.__spaces(zone_length)}|"
                     f"{self.__container_type_string(value, max_container_type_length) if value.container_type is not None else self.__spaces(container_length)}"
                     f"{self.__container_number_string(value, max_container_number_length) if value.container_number is not None else ''}|"
+                    f"{self.__author_name_string(value.author_name, max_author_name_length)}|"
                 )
                 for key, value in items.items()
             ]

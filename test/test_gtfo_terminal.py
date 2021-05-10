@@ -36,6 +36,8 @@ class TestSendBye(unittest.TestCase):
 
 
 class TestSendList(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         pass
 
@@ -81,17 +83,17 @@ class TestSendList(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "id|          |         |          |",
-                    "01|Ammo:    1|zone: 335| box:    1|",
-                    "02|L2LP: 1111|zone:   5|lock: 3455|",
-                    "03|L2LP: 1111|zone:   5|lock: 3455|",
-                    "04|L2LP: 1111|zone:   5|lock: 3455|",
-                    "05|L2LP: 1111|zone:   5|lock: 3455|",
-                    "06|L2LP: 1111|zone:   5|lock: 3455|",
-                    "07|L2LP: 1111|zone:   5|lock: 3455|",
-                    "08|L2LP: 1111|zone:   5|lock: 3455|",
-                    "09|L2LP: 1111|zone:   5|lock: 3455|",
-                    "10|L2LP: 1111|zone:   5|lock: 3455|",
+                    "id|          |         |          |      |",
+                    "01|Ammo:    1|zone: 335| box:    1|nobody|",
+                    "02|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "03|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "04|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "05|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "06|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "07|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "08|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "09|L2LP: 1111|zone:   5|lock: 3455|nobody|",
+                    "10|L2LP: 1111|zone:   5|lock: 3455|nobody|",
                     "```",
                 ]
             ),
@@ -117,6 +119,8 @@ class TestSendOnlyList(unittest.TestCase):
 
 
 class TestSendAdd(unittest.TestCase):
+    maxDiff = None
+
     def setUp(self) -> None:
         pass
 
@@ -166,8 +170,8 @@ class TestSendAdd(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "x|       |||",
-                    "1|Ammo: 1|||",
+                    "x|       |||      |",
+                    "1|Ammo: 1|||nobody|",
                     "```",
                 ]
             ),
@@ -260,9 +264,9 @@ class TestSendAdd(unittest.TestCase):
             "\n".join(
                 [
                     "```",
-                    "x|       |       |      |",
-                    "1|Ammo: 1|       |      |",
-                    "2|Ammo: 1|zone: 1|box: 1|",
+                    "x|       |       |      |      |",
+                    "1|Ammo: 1|       |      |nobody|",
+                    "2|Ammo: 1|zone: 1|box: 1|nobody|",
                     "```",
                 ]
             ),
