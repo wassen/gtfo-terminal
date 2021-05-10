@@ -6,16 +6,16 @@ from .choices import AddContainerTypeChoice
 
 
 class ListResponse(Response):
-    message: str
+    items: Dict[int, Item]
 
     def response_string(self) -> str:
-        return self.message
+        return self.format(self.items)
 
     def __init__(
         self,
-        message: str,
+        items: Dict[int, Item],
     ):
-        self.message = message
+        self.items = items
 
     def __spaces(self, count: int) -> str:
         return " " * count
@@ -47,7 +47,6 @@ class ListResponse(Response):
         zone_numbers = [
             item.zone_number for item in items.values() if item.zone_number is not None
         ]
-        max_zone_number_length: int
         if len(zone_numbers) == 0:
             max_zone_number_length = 0
         else:
@@ -101,24 +100,24 @@ class ListResponse(Response):
             )
 
     def __item_type_string(self, value: Item, max_item_type_length: int) -> str:
-        return f"{self.__spaces(max_item_type_length - len(value.item_type.short_name))}{value.item_type.short_name}:"
+        return f"{self.__spaces(max_item_type_length - len(value.item_type.short_name))}{value.item_type.short_name}: "
 
     def __item_count_string(self, value: Item, max_item_count_length: int) -> str:
-        return f" {value.item_count:{max_item_count_length}d}|"
+        return f"{value.item_count:{max_item_count_length}d}"
 
     def __zone_string(self, value: Item, max_zone_number_length: int) -> str:
         # unwrapしてから渡したい
-        return f"zone: {value.zone_number:{max_zone_number_length}d}|"
+        return f"zone: {value.zone_number:{max_zone_number_length}d}"
 
     def __container_type_string(
         self, value: Item, max_container_type_length: int
     ) -> str:
-        return f"{self.__spaces(max_container_type_length - len(value.container_type.short_name))}{value.container_type.short_name}:"
+        return f"{self.__spaces(max_container_type_length - len(value.container_type.short_name))}{value.container_type.short_name}: "
 
     def __container_number_string(
         self, value: Item, max_container_number_length: int
     ) -> str:
-        return f" {value.container_number:{max_container_number_length}d}|"
+        return f"{value.container_number:{max_container_number_length}d}"
 
     def format(
         self,
@@ -140,18 +139,20 @@ class ListResponse(Response):
         ) = self.__container_length(items)
 
         return "\n".join(
-            [
+            ["```"]
+            + [
                 f"x|{self.__spaces(item_length)}|{self.__spaces(zone_length)}|{self.__spaces(container_length)}|"
             ]
             + [
                 (
                     f"{key}|"
                     f"{self.__item_type_string(value, max_item_type_length)}"
-                    f"{self.__item_count_string(value, max_item_count_length)}"
-                    f"{self.__zone_string(value, max_zone_number_length) if value.zone_number is not None else self.__spaces(zone_length)}"
+                    f"{self.__item_count_string(value, max_item_count_length)}|"
+                    f"{self.__zone_string(value, max_zone_number_length) if value.zone_number is not None else self.__spaces(zone_length)}|"
                     f"{self.__container_type_string(value, max_container_type_length) if value.container_type is not None else self.__spaces(container_length)}"
-                    f"{self.__container_number_string(value, max_container_number_length) if value.container_number is not None else ''}"
+                    f"{self.__container_number_string(value, max_container_number_length) if value.container_number is not None else ''}|"
                 )
                 for key, value in items.items()
             ]
+            + ["```"]
         )

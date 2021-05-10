@@ -9,23 +9,19 @@ from ..response.choices import AddContainerTypeChoice, AddItemTypeChoice
 class Item:
     item_type: AddItemTypeChoice
     item_count: int
-    zone_number: Optional[int]
-    container_type: Optional[AddContainerTypeChoice]
-    container_number: Optional[int]
+    zone_number: Optional[int] = None
+    container_type: Optional[AddContainerTypeChoice] = None
+    container_number: Optional[int] = None
 
-    class Builder:
-        item_type: Optional[AddItemTypeChoice]
-        item_count: Optional[int]
-        zone_number: Optional[int]
-        container_type: Optional[AddContainerTypeChoice]
-        container_number: Optional[int]
+    # class Builder:
+    #     item_type: Optional[AddItemTypeChoice]
+    #     item_count: Optional[int]
+    #     zone_number: Optional[int]
+    #     container_type: Optional[AddContainerTypeChoice]
+    #     container_number: Optional[int]
 
-        def build(self) -> "Item":
-            return Item(self)
-
-    # いい感じに全列をフォーマットさせたい
-    def __str__(self) -> str:
-        return f"|{self.item_type.short_name}: {self.item_count}|zone: {self.zone_number}|{self.container_type.itemName}: {self.container_number}|"
+    #     def build(self) -> "Item":
+    #         return Item(self)
 
     # def __init__(self, builder: Builder):
     #     if not builder.item_type:

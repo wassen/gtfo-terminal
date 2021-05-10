@@ -17,9 +17,11 @@ class Request:
             "disconnect",
         ]
         addCommand = [
+            "a",
             "add",
         ]
-        addCommand = [
+        listCommand = [
+            "l",
             "list",
         ]
 
@@ -28,7 +30,7 @@ class Request:
         elif messageContent in addCommand:
             return CommandRequest.add
         elif messageContent in listCommand:
-            return CommandRequest.add
+            return CommandRequest.list
         elif isinstance(number := int(messageContent), int):
             return NumberRequest(number)
         else:

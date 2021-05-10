@@ -287,7 +287,7 @@ class GTFOTerminal(discord.Client):
 
 class AddResponder:
     current_state: AddState = AddState.item_type
-    item = Item()
+    item: Item
 
     def firstResponse(self) -> AddResponse:
         return AddItemTypeResponse()
@@ -324,6 +324,7 @@ class AddResponder:
 
     def __init__(self) -> None:
         self.curernt_state = AddState.item_type
+        self.item = Item()
 
 
 add_responder: Optional[AddResponder] = None
@@ -352,7 +353,7 @@ class Responder:
             else:
                 return AddInAdditionResponse()
         elif request == CommandRequest.list:
-            return ListResponse(message=ListCommand([""]).output())
+            return ListResponse(Store().findAll())
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
 

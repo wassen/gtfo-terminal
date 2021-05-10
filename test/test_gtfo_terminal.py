@@ -18,6 +18,7 @@ from src.response.choices import (AddCompleteResponse,
                                   AddZoneNumberResponse)
 from src.response.good_bye import GoodByeResponse
 from src.response.list import ListResponse
+from src.store.memory_store import MemoryStore
 
 
 class TestSendBye(unittest.TestCase):
@@ -35,6 +36,12 @@ class TestSendBye(unittest.TestCase):
 
 
 class TestSendList(unittest.TestCase):
+    def setUp(self) -> None:
+        pass
+
+    def tearDown(self) -> None:
+        MemoryStore().clear()
+
     def item1(self) -> Item:
         # builderをItemに作りたい
         item = Item()
@@ -62,21 +69,25 @@ class TestSendList(unittest.TestCase):
         }
 
         self.assertEqual(
-            ListResponse("message").format(items),
+            ListResponse(items).response_string(),
             "\n".join(
                 [
+                    "```",
                     "x|          |         |          |",
                     "0|Ammo:    1|zone: 335| box:    1|",
                     "1|L2LP: 1111|zone:   5|lock: 3455|",
+                    "```",
                 ]
             ),
         )
 
-    def test_short_name_lon(self) -> None:
+    def test_short_name_length(self) -> None:
         self.assertTrue(
             all([len(item.short_name) == 4 for item in AddItemTypeChoice]),
         )
 
+
+class TestSendOnlyList(unittest.TestCase):
     def test_only_list(self) -> None:
         responder = Responder()
 
@@ -95,9 +106,56 @@ class TestSendAdd(unittest.TestCase):
 
     def tearDown(self) -> None:
         clear_add_responder()
+        MemoryStore().clear()
 
-    def test_add(self) -> None:
+    def test_add1(self) -> None:
         responder = Responder()
+
+        response = unwrap(responder.send_request(CommandRequest.add))
+
+        # 何を追加しますか？
+        self.assertEqual(
+            response.response_string(),
+            AddItemTypeResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(1)))
+
+        # アイテムの数は？
+        self.assertEqual(
+            response.response_string(),
+            AddItemCountResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(1)))
+
+        # 何編集する？
+        self.assertEqual(
+            response.response_string(),
+            AddEditResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(NumberRequest(0)))
+
+        # 完了しました
+        self.assertEqual(
+            response.response_string(),
+            AddCompleteResponse().response_string(),
+        )
+
+        response = unwrap(responder.send_request(CommandRequest.list))
+
+        self.assertEqual(
+            response.response_string(),
+            "\n".join(
+                [
+                    "```",
+                    "x|       |||",
+                    "0|Ammo: 1|||",
+                    "```",
+                ]
+            ),
+        )
 
         response = unwrap(responder.send_request(CommandRequest.add))
 
@@ -183,7 +241,15 @@ class TestSendAdd(unittest.TestCase):
 
         self.assertEqual(
             response.response_string(),
-            ListResponse(message="").response_string(),
+            "\n".join(
+                [
+                    "```",
+                    "x|       |       |      |",
+                    "0|Ammo: 1|       |      |",
+                    "1|Ammo: 1|zone: 1|box: 1|",
+                    "```",
+                ]
+            ),
         )
 
 
