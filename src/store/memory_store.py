@@ -9,7 +9,7 @@ class _Column(NamedTuple):
     logical_deleted: bool = False
 
 
-_index: int = 0
+_index: int = 1
 _store: Dict[
     int,
     _Column,
@@ -23,7 +23,7 @@ class MemoryStore(Store):
     ) -> None:
         global _index, _store
 
-        _index = 0
+        _index = 1
         _store = {}
 
     def add(

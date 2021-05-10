@@ -64,8 +64,8 @@ class TestSendList(unittest.TestCase):
 
     def test_format(self) -> None:
         items = {
-            0: self.item1(),
-            1: self.item2(),
+            1: self.item1(),
+            2: self.item2(),
         }
 
         self.assertEqual(
@@ -74,8 +74,8 @@ class TestSendList(unittest.TestCase):
                 [
                     "```",
                     "x|          |         |          |",
-                    "0|Ammo:    1|zone: 335| box:    1|",
-                    "1|L2LP: 1111|zone:   5|lock: 3455|",
+                    "1|Ammo:    1|zone: 335| box:    1|",
+                    "2|L2LP: 1111|zone:   5|lock: 3455|",
                     "```",
                 ]
             ),
@@ -151,7 +151,7 @@ class TestSendAdd(unittest.TestCase):
                 [
                     "```",
                     "x|       |||",
-                    "0|Ammo: 1|||",
+                    "1|Ammo: 1|||",
                     "```",
                 ]
             ),
@@ -245,8 +245,8 @@ class TestSendAdd(unittest.TestCase):
                 [
                     "```",
                     "x|       |       |      |",
-                    "0|Ammo: 1|       |      |",
-                    "1|Ammo: 1|zone: 1|box: 1|",
+                    "1|Ammo: 1|       |      |",
+                    "2|Ammo: 1|zone: 1|box: 1|",
                     "```",
                 ]
             ),
