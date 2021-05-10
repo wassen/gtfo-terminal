@@ -19,7 +19,7 @@ mypy:
 	-pipenv run mypy ./test/test_gtfo_terminal.py --strict
 
 test:
-	pipenv run python -m unittest test/test_gtfo_terminal.py
+	pipenv run green test/test_gtfo_terminal.py
 
 format:
 	pipenv run black .

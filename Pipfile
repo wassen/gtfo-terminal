@@ -10,6 +10,7 @@ pyyaml = "*"
 black = "*"
 isort = "*"
 "discord.py-stubs" = "*"
+green = "*"
 
 [dev-packages]
 

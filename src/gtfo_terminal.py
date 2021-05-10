@@ -257,7 +257,10 @@ class GTFOTerminal(discord.Client):
         if request is None:
             return
 
-        response = Responder().send_request(request)
+        response = Responder().send_request(
+            request,
+            member_name=message.author.name,
+        )
 
         if response is None:
             return
