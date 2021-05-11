@@ -9,7 +9,7 @@ import discord
 from . import state
 from .environment import Env
 from .item.item import Item
-from .request import CommandRequest, NumberRequest, Request
+from .request import CommandRequest, NumberRequest, Request, RescueRequest
 from .response import Response
 from .response.choices import (AddContainerNumberResponse,
                                AddContainerTypeChoice,
@@ -20,7 +20,8 @@ from .response.choices import (AddContainerNumberResponse,
 from .response.clear import ClearResponse
 from .response.good_bye import GoodByeResponse
 from .response.list import ListResponse
-from .store.memory_store import clear_store, get_store
+from .response.rescue import RescueResponse
+from .store.memory_store import clear_store, get_store, rescue_store
 
 
 def read_help() -> str:
@@ -46,7 +47,7 @@ class ListCommand(Command):
     def __parse(self, elements: List[str]) -> None:
         formatted_output_line = [
             f"index: {key}, value: {value.__str__()}"
-            for (key, value) in __store.findAll().items()
+            for (key, value) in get_store().findAll().items()
         ]
         self.message = "\n".join(formatted_output_line)
 
@@ -363,6 +364,11 @@ class Responder:
         elif request == CommandRequest.clear:
             random_hash = clear_store()
             return ClearResponse(random_hash)
+        elif type(request) is RescueRequest:
+            rescueRequest = cast(RescueRequest, request)
+
+            previous_random_hash = rescue_store(rescueRequest.random_hash)
+            return RescueResponse(previous_random_hash)
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
 

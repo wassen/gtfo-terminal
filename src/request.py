@@ -27,6 +27,7 @@ class Request:
         clearCommand = [
             "CLEAR_ALL",
         ]
+        rescueCommand = "rescue"
 
         if messageContent in byeCommand:
             return CommandRequest.bye
@@ -36,10 +37,20 @@ class Request:
             return CommandRequest.list
         elif messageContent in clearCommand:
             return CommandRequest.clear
+        elif messageContent.startswith(rescueCommand):
+            return RescueRequest(messageContent)
         elif isinstance(number := int(messageContent), int):
             return NumberRequest(number)
         else:
             return None
+
+
+class RescueRequest(Request):
+    random_hash: str
+
+    def __init__(self, message_content: str) -> None:
+        random_hash = message_content.split(" ")[1]
+        self.random_hash = random_hash
 
 
 class NumberRequest(Request):

@@ -7,7 +7,7 @@ from typing import cast
 from src.extension import unwrap
 from src.gtfo_terminal import Responder, clear_add_responder
 from src.item.item import Item
-from src.request import CommandRequest, NumberRequest, Request
+from src.request import CommandRequest, NumberRequest, Request, RescueRequest
 from src.response import Response
 from src.response.choices import (AddCompleteResponse,
                                   AddContainerNumberResponse,
@@ -19,6 +19,7 @@ from src.response.choices import (AddCompleteResponse,
 from src.response.clear import ClearResponse
 from src.response.good_bye import GoodByeResponse
 from src.response.list import ListResponse
+from src.response.rescue import RescueResponse
 from src.store.memory_store import clear_store
 
 
@@ -43,12 +44,25 @@ class TestSendClear(unittest.TestCase):
         response = responder.send_request(CommandRequest.clear)
 
         self.assertNotEqual(response, None)
-        response = cast(Response, response)
+        clear_response = cast(ClearResponse, response)
 
-        # もとに戻すテストが作れないなこの作り
+        # memory_storeに対するテストも作りたいね
         self.assertEqual(
-            response.response_string()[:15],
-            ClearResponse("").response_string()[:15],
+            clear_response.response_string(),
+            ClearResponse(clear_response.random_hash).response_string(),
+        )
+
+        response = responder.send_request(
+            RescueRequest(f"rescue {clear_response.random_hash}")
+        )
+
+        self.assertNotEqual(response, None)
+        rescue_response = cast(RescueResponse, response)
+
+        # memory_storeに対するテストも作りたいね
+        self.assertEqual(
+            rescue_response.response_string(),
+            RescueResponse(rescue_response.random_hash).response_string(),
         )
 
 
