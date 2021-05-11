@@ -17,9 +17,10 @@ from .response.choices import (AddContainerNumberResponse,
                                AddEditResponse, AddInAdditionResponse,
                                AddItemCountResponse, AddItemTypeChoice,
                                AddItemTypeResponse, AddResponse, AddState)
+from .response.clear import ClearResponse
 from .response.good_bye import GoodByeResponse
 from .response.list import ListResponse
-from .store.memory_store import MemoryStore as Store
+from .store.memory_store import clear_store, get_store
 
 
 def read_help() -> str:
@@ -45,7 +46,7 @@ class ListCommand(Command):
     def __parse(self, elements: List[str]) -> None:
         formatted_output_line = [
             f"index: {key}, value: {value.__str__()}"
-            for (key, value) in Store().findAll().items()
+            for (key, value) in __store.findAll().items()
         ]
         self.message = "\n".join(formatted_output_line)
 
@@ -358,7 +359,10 @@ class Responder:
             else:
                 return AddInAdditionResponse()
         elif request == CommandRequest.list:
-            return ListResponse(Store().findAll())
+            return ListResponse(get_store().findAll())
+        elif request == CommandRequest.clear:
+            random_hash = clear_store()
+            return ClearResponse(random_hash)
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
 
@@ -370,7 +374,7 @@ class Responder:
                 if response.complete:
                     item = add_responder.item
                     item.author_name = member_name
-                    Store().add(item)
+                    get_store().add(item)
                     add_responder = None
 
                 return response

@@ -1,13 +1,13 @@
-from typing import Optional
+from typing import Dict, Optional
 
 from ..item.item import Item
 
 
 class Store:
-    def clear(
-        self,
-    ) -> None:
-        raise NotImplementedError()
+    # def clear(
+    #     self,
+    # ) -> None:
+    #     raise NotImplementedError()
 
     def add(
         self,
@@ -32,4 +32,10 @@ class Store:
         self,
         index: int,
     ) -> Optional[Item]:
+
+        raise NotImplementedError()
+
+    def findAll(
+        self,
+    ) -> Dict[int, Item]:
         raise NotImplementedError()

@@ -24,6 +24,9 @@ class Request:
             "l",
             "list",
         ]
+        clearCommand = [
+            "CLEAR_ALL",
+        ]
 
         if messageContent in byeCommand:
             return CommandRequest.bye
@@ -31,6 +34,8 @@ class Request:
             return CommandRequest.add
         elif messageContent in listCommand:
             return CommandRequest.list
+        elif messageContent in clearCommand:
+            return CommandRequest.clear
         elif isinstance(number := int(messageContent), int):
             return NumberRequest(number)
         else:
@@ -48,3 +53,4 @@ class CommandRequest(Request, Enum):
     bye = auto()
     add = auto()
     list = auto()
+    clear = auto()

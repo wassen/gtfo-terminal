@@ -16,9 +16,10 @@ from src.response.choices import (AddCompleteResponse,
                                   AddInAdditionResponse, AddItemCountResponse,
                                   AddItemTypeChoice, AddItemTypeResponse,
                                   AddZoneNumberResponse)
+from src.response.clear import ClearResponse
 from src.response.good_bye import GoodByeResponse
 from src.response.list import ListResponse
-from src.store.memory_store import MemoryStore
+from src.store.memory_store import clear_store
 
 
 class TestSendBye(unittest.TestCase):
@@ -35,6 +36,22 @@ class TestSendBye(unittest.TestCase):
         )
 
 
+class TestSendClear(unittest.TestCase):
+    def test_clear(self) -> None:
+        responder = Responder()
+
+        response = responder.send_request(CommandRequest.clear)
+
+        self.assertNotEqual(response, None)
+        response = cast(Response, response)
+
+        # もとに戻すテストが作れないなこの作り
+        self.assertEqual(
+            response.response_string()[:15],
+            ClearResponse("").response_string()[:15],
+        )
+
+
 class TestSendList(unittest.TestCase):
     maxDiff = None
 
@@ -42,7 +59,7 @@ class TestSendList(unittest.TestCase):
         pass
 
     def tearDown(self) -> None:
-        MemoryStore().clear()
+        clear_store()
 
     def item1(self) -> Item:
         # builderをItemに作りたい
@@ -128,7 +145,7 @@ class TestSendAdd(unittest.TestCase):
 
     def tearDown(self) -> None:
         clear_add_responder()
-        MemoryStore().clear()
+        clear_store()
 
     def test_add1(self) -> None:
         responder = Responder()

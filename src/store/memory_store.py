@@ -1,54 +1,43 @@
+import hashlib
+import random
 from typing import Dict, List, NamedTuple, Optional
 
 from ..item.item import Item
 from . import Store
 
 
-class _Column(NamedTuple):
-    item: Item
-    logical_deleted: bool = False
-
-
-_index: int = 1
-_store: Dict[
-    int,
-    _Column,
-] = {}
-
 # スレッドセーフじゃない、というか複数インスタンス不可なので、インスタンスごとに保存できるか？
 # store に名前つけられるようにするか
 class MemoryStore(Store):
-    def clear(
-        self,
-    ) -> None:
-        global _index, _store
+    class __Column(NamedTuple):
+        item: Item
+        logical_deleted: bool = False
 
-        _index = 1
-        _store = {}
+    __index: int
+    __store: Dict[
+        int,
+        __Column,
+    ]
 
     def add(
         self,
         item: Item,
     ) -> int:
-        global _index, _store
-
-        current_index = _index
-        _index = current_index + 1
-        _store[current_index] = _Column(item)
+        current_index = self.__index
+        self.__index = current_index + 1
+        self.__store[current_index] = self.__Column(item)
         return current_index
 
     def restore(
         self,
         index: int,
     ) -> Optional[Item]:
-        global _store
-
-        targetColumn = _store.pop(index, None)
+        targetColumn = self.__store.pop(index, None)
 
         if (targetColumn := targetColumn) is None:
             return None
 
-        _store[index] = _Column(
+        self.__store[index] = self.__Column(
             item=targetColumn.item,
             logical_deleted=False,
         )
@@ -59,14 +48,12 @@ class MemoryStore(Store):
         self,
         index: int,
     ) -> Optional[Item]:
-        global _store
-
-        deletedColumn = _store.pop(index, None)
+        deletedColumn = self.__store.pop(index, None)
 
         if (deletedColumn := deletedColumn) is None:
             return None
 
-        _store[index] = _Column(
+        self.__store[index] = self.__Column(
             item=deletedColumn.item,
             logical_deleted=True,
         )
@@ -78,9 +65,7 @@ class MemoryStore(Store):
         index: int,
         item: Item,
     ) -> None:
-        global _store
-
-        _store[index] = _Column(
+        self.__store[index] = self.__Column(
             item=item,
             logical_deleted=False,
         )
@@ -88,5 +73,43 @@ class MemoryStore(Store):
     def findAll(
         self,
     ) -> Dict[int, Item]:
-        global _store
-        return {key: value.item for key, value in _store.items()}
+        return {key: value.item for key, value in self.__store.items()}
+
+    def __init__(self) -> None:
+        self.__index = 1
+        self.__store = {}
+
+
+__past_stores: Dict[str, Store] = {}
+__store: Store = MemoryStore()
+
+
+def __generate_random_hash() -> str:
+    # storeのobject_idでもよかったような
+    return hashlib.md5(str(random.random()).encode()).hexdigest()
+
+
+def get_store() -> Store:
+    return __store
+
+
+def clear_store() -> str:
+    global __past_stores, __store
+
+    random_hash = __generate_random_hash()
+    __past_stores[random_hash] = __store
+    __store = MemoryStore()
+
+    return random_hash
+
+
+def rescue_store(
+    key: str,
+) -> str:
+    global __past_stores, __store
+
+    random_hash = __generate_random_hash()
+    __past_stores[random_hash] = __store
+    __store = __past_stores[key]
+
+    return random_hash

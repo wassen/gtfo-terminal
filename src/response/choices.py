@@ -68,6 +68,7 @@ class AddCompleteResponse(AddResponse):
 
 
 class AddState(Enum):
+    # idleはAddStateじゃないような
     idle = auto()
     item_type = auto()
     item_count = auto()
@@ -79,7 +80,7 @@ class AddState(Enum):
     def response(self) -> AddResponse:
         if self == AddState.idle:
             return AddCompleteResponse()
-        if self == AddState.item_type:
+        elif self == AddState.item_type:
             return AddItemTypeResponse()
         elif self == AddState.item_count:
             return AddItemCountResponse()
@@ -203,7 +204,6 @@ class AddEditChoice(Choice, Enum):
 
     def next_state(self) -> AddState:
         if self == AddEditChoice.complete:
-            # Noneじゃなくて平常時も状態として管理しない？
             return AddState.idle
         elif self == AddEditChoice.zone:
             return AddState.zone_number
