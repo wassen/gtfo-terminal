@@ -9,7 +9,8 @@ import discord
 from . import state
 from .environment import Env
 from .item.item import Item
-from .request import CommandRequest, NumberRequest, Request, RescueRequest
+from .request import (CommandRequest, NumberRequest, Request, RescueRequest,
+                      SelectRequest)
 from .response import Response
 from .response.choices import (AddContainerNumberResponse,
                                AddContainerTypeChoice,
@@ -21,6 +22,7 @@ from .response.clear import ClearResponse
 from .response.good_bye import GoodByeResponse
 from .response.list import ListResponse
 from .response.rescue import RescueResponse
+from .response.select import SelectResponse, SelectState
 from .store.memory_store import clear_store, get_store, rescue_store
 
 
@@ -290,6 +292,50 @@ class GTFOTerminal(discord.Client):
         #         await message.channel.send(output)
 
 
+class SelectResponder:
+    current_state: SelectState
+    item: Item
+    index: int
+
+    def firstResponse(self) -> SelectResponse:
+        return SelectEditResponse()
+
+    def sendNumber(self, number: int) -> Optional[AddResponse]:
+        if self.current_state == AddState.item_type:
+            self.item.item_type = AddItemTypeChoice(number)
+            self.current_state = AddState.item_count
+            return AddItemCountResponse()
+        elif self.current_state == AddState.item_count:
+            self.item.item_count = number
+            self.current_state = AddState.edit
+            return AddEditResponse()
+        elif self.current_state == AddState.edit:
+            if (next_state := AddEditChoice(number).next_state()) is None:
+                return "ぬぬ"
+            else:
+                self.current_state = next_state
+                return next_state.response()
+        elif self.current_state == AddState.zone_number:
+            self.item.zone_number = number
+            self.current_state = AddState.edit
+            return AddEditResponse()
+        elif self.current_state == AddState.container_type:
+            self.item.container_type = AddContainerTypeChoice(number)
+            self.current_state = AddState.container_number
+            return AddContainerNumberResponse()
+        elif self.current_state == AddState.container_number:
+            self.item.container_number = number
+            self.current_state = AddState.edit
+            return AddEditResponse()
+        else:
+            return None
+
+    def __init__(self, index: int) -> None:
+        self.curernt_state = SelectState.edit
+        self.item = Item()
+        self.index = index
+
+
 class AddResponder:
     current_state: AddState = AddState.item_type
     item: Item
@@ -333,6 +379,7 @@ class AddResponder:
 
 
 add_responder: Optional[AddResponder] = None
+select_responder: Optional[SelectResponder] = None
 
 
 # ストアは別モジュールにしたい
@@ -348,7 +395,7 @@ class Responder:
     def send_request(
         self, request: Request, member_name: str = "nobody"
     ) -> Optional[Response]:
-        global add_responder
+        global add_responder, select_responder
 
         if request == CommandRequest.bye:
             return GoodByeResponse()
@@ -364,6 +411,17 @@ class Responder:
         elif request == CommandRequest.clear:
             random_hash = clear_store()
             return ClearResponse(random_hash)
+        elif type(request) is SelectRequest:
+            selectRequest = cast(SelectRequest, request)
+
+            if select_responder is None:
+                select_responder = SelectResponder(request.index)
+                return select_responder.firstResponse()
+            else:
+                return SelectInSelectionResponse()
+
+            previous_random_hash = rescue_store(selectRequest.random_hash)
+            return SelectResponse(previous_random_hash)
         elif type(request) is RescueRequest:
             rescueRequest = cast(RescueRequest, request)
 
@@ -371,20 +429,36 @@ class Responder:
             return RescueResponse(previous_random_hash)
         elif type(request) is NumberRequest:
             numberRequest = cast(NumberRequest, request)
+            if (ar := add_responder) is not None:
+                if (response := ar.sendNumber(numberRequest.value)) is not None:
+                    # ネスト深すぎ
+                    if response.complete:
+                        item = ar.item
+                        item.author_name = member_name
+                        get_store().add(item)
+                        add_responder = None
 
-            if (add_responder := add_responder) is None:
-                return None
-
-            if (response := add_responder.sendNumber(numberRequest.value)) is not None:
-                # ネスト深すぎ
+                    return response
+            elif ((sr := select_responder) is not None) and (
+                response := sr.send_number(numberRequest.value)
+            ) is not None:
                 if response.complete:
-                    item = add_responder.item
+                    select_responder = None
+
+                if response.modify:
+                    item = sr.item
+                    index = sr.index
                     item.author_name = member_name
-                    get_store().add(item)
-                    add_responder = None
+                    get_store().modify(index, item)
+                elif response.delete:
+                    index = sr.index
+                    get_store().delete(index)
+                else:
+                    raise Exception()
 
                 return response
             else:
                 return None
+
         else:
             raise Exception()

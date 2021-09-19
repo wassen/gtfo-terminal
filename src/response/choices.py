@@ -244,18 +244,18 @@ class AddContainerTypeChoice(Choice, Enum):
 
 
 # matrix?
-def from_state_to_choice(state: AddState) -> Optional[Type[Choice]]:
-    if AddState.item_type:
-        return AddItemTypeChoice
-    elif AddState.item_count:
-        return None
-    elif AddState.edit:
-        return AddEditChoice
-    elif AddState.zone_number:
-        return None
-    elif AddState.container_type:
-        return AddContainerTypeChoice
-    elif AddState.container_number:
-        return None
-    else:
-        raise Exception()
+# def from_state_to_choice(state: AddState) -> Optional[Type[Choice]]:
+#     if AddState.item_type:
+#         return AddItemTypeChoice
+#     elif AddState.item_count:
+#         return None
+#     elif AddState.edit:
+#         return AddEditChoice
+#     elif AddState.zone_number:
+#         return None
+#     elif AddState.container_type:
+#         return AddContainerTypeChoice
+#     elif AddState.container_number:
+#         return None
+#     else:
+#         raise Exception()

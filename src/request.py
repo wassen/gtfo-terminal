@@ -45,6 +45,13 @@ class Request:
             return None
 
 
+class SelectRequest(Request):
+    index: int
+
+    def __init__(self, message_content: str) -> None:
+        self.index = int(message_content.split(" ")[1])
+
+
 class RescueRequest(Request):
     random_hash: str
 
